@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#f5f5f7">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  
+  <title>Currency-Core Tracker</title>
+  <style>
+    :root {
+      --bg-color: #f5f5f7;
+      --text-color: #1d1d1f;
+      --card-bg: #ffffff;
+      --primary-gradient: linear-gradient(135deg, #a300d6, #ff007a);
+      --accent-color: #a300d6;
+      --subtitle-color: #6e6e77;
+      --border-color: rgba(0,0,0,0.12);
+      --error-bg: rgba(255,69,58,0.1);
+      --error-text: #ff453a;
+    }
+
+    html { 
+      color-scheme: light dark; 
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
+      padding: 12px; 
+      color: var(--text-color); 
+      background: var(--bg-color); 
+      text-align: center; 
+      -webkit-tap-highlight-color: transparent; 
+    }
+
+    .glow-title { 
+      background: var(--primary-gradient); 
+      -webkit-background-clip: text; 
+      -webkit-text-fill-color: transparent; 
+      font-size: 26px; 
+      font-weight: 700; 
+      margin-bottom: 25px; 
+      letter-spacing: -0.5px; 
+    }
+
+    .tracker-wrapper { margin: 20px auto; max-width: 400px; text-align: left; padding: 0 16px; }
+    .input-label { display: block; font-size: 11px; color: var(--subtitle-color); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 8px; font-weight: 700; }
+
+    .premium-input, .premium-select { 
+      width: 100%; padding: 14px; background: var(--card-bg); border: 1px solid var(--border-color); 
+      border-radius: 12px; color: var(--text-color); font-size: 15px; font-weight: 600; outline: none; 
+      box-shadow: inset 0 1px 2px rgba(0,0,0,0.02); transition: border-color 0.2s ease; box-sizing: border-box; 
+      display: block; margin-bottom: 20px;
+    }
+
+    .premium-select { cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.03); -webkit-appearance: none; appearance: none; }
+    .premium-input { text-transform: uppercase; margin-bottom: 12px; }
+    .premium-input:focus, .premium-select:focus { border-color: var(--accent-color); }
+
+    .core-btn { 
+      width: 100%; background: var(--primary-gradient); color: #ffffff; border: none; padding: 0 24px; 
+      font-size: 14px; font-weight: 700; border-radius: 12px; cursor: pointer; transition: all 0.2s ease; 
+      box-shadow: 0 4px 12px rgba(163,0,214,0.3); height: 48px; display: flex; align-items: center; 
+      justify-content: center; box-sizing: border-box; 
+    }
+
+    .core-btn:active { transform: scale(0.99); opacity: 0.95; }
+
+    .dashboard-container { 
+      background: var(--card-bg); border: 1px solid rgba(0,0,0,0.04); box-shadow: 0 12px 30px rgba(0,0,0,0.04); 
+      padding: 24px; margin: 24px auto; max-width: 400px; border-radius: 16px; display: none;
+    }
+
+    .dashboard-title { margin-top: 0; color: var(--accent-color); font-size: 20px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+    .data-table { width: 100%; border-collapse: collapse; margin-top: 15px; text-align: left; }
+    .data-row { border-bottom: 1px solid rgba(0,0,0,0.05); }
+    .data-label { padding: 14px 0; font-weight: 500; color: #86868b; font-size: 14px; }
+    .data-value { padding: 14px 0; text-align: right; font-weight: 700; color: var(--text-color); font-size: 18px; }
+
+    .error-box {
+      color: var(--error-text); font-weight: 600; margin: 20px auto; max-width: 380px; padding: 12px; 
+      background: var(--error-bg); border-radius: 8px; display: none; font-size: 14px; text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+  <h1 class="glow-title">Currency-Core</h1>
+
+  <div class="tracker-wrapper">
+    <label class="input-label">QUICK SELECT ANY ASSET:</label>
+    <select id="quickSelect" class="premium-select" onchange="applyShortcut(this.value)">
+      <option value="">-- Choose an Asset --</option>
+      <optgroup label="Global Fiat Currencies">
+        <option value="MXN">Mexican Peso (MXN)</option>
+        <option value="EUR">Euro (EUR)</option>
+        <option value="CAD">Canadian Dollar (CAD)</option>
+        <option value="GBP">British Pound (GBP)</option>
+      </optgroup>
+      <optgroup label="Top Cryptocurrencies">
+        <option value="BTC">Bitcoin (BTC)</option>
+        <option value="ETH">Ethereum (ETH)</option>
+        <option value="SOL">Solana (SOL)</option>
+        <option value="BNB">BNB Coin (BNB)</option>
+        <option value="XRP">Ripple (XRP)</option>
+        <option value="ADA">Cardano (ADA)</option>
+        <option value="DOT">Polkadot (DOT)</option>
+        <option value="LINK">Chainlink (LINK)</option>
+        <option value="MATIC">Polygon (MATIC)</option>
+        <option value="LTC">Litecoin (LTC)</option>
+        <option value="UNI">Uniswap (UNI)</option>
+        <option value="XLM">Stellar (XLM)</option>
+        <option value="TRX">TRON (TRX)</option>
+        <option value="ETC">Ethereum Classic (ETC)</option>
+        <option value="BTG">Bitcoin Gold (BTG)</option>
+      </optgroup>
+      <optgroup label="Popular Meme Coins">
+        <option value="DOGE">Dogecoin (DOGE)</option>
+        <option value="SHIB">Shiba Inu (SHIB)</option>
+        <option value="PEPE">Pepe Coin (PEPE)</option>
+        <option value="WIF">Dogwifhat (WIF)</option>
+        <option value="BONK">Bonk (BONK)</option>
+        <option value="FLOKI">Floki Inu (FLOKI)</option>
+        <option value="BOME">BOOK OF MEME (BOME)</option>
+        <option value="BRETT">Brett (BRETT)</option>
+        <option value="POPCAT">Popcat (POPCAT)</option>
+        <option value="MOG">Mog Coin (MOG)</option>
+      </optgroup>
+    </select>
+
+    <label class="input-label">SEARCH TICKER OR ID:</label>
+    <input id="coinInput" type="text" value="BTC" placeholder="e.g., MXN, BTC, SHIB, PEPE" class="premium-input">
+    <button onclick="routeFetch()" class="core-btn">FETCH</button>
+  </div>
+
+  <div id="cryptoDashboard" class="dashboard-container">
+    <h2 id="coinName" class="dashboard-title">---</h2>
+    <table class="data-table">
+      <tr class="data-row">
+        <td id="labelOne" class="data-label">Value:</td>
+        <td id="currentPrice" class="data-value">$0.00</td>
+      </tr>
+    </table>
+  </div>
+
+  <div id="errorBox" class="error-box"></div>
+
+  <script>
+    const _0x5b3e = [
+      'value', 'toUpperCase', 'coinInput', 'getElementById', 'trim', 'indexOf', 'MXN', 'EUR', 'CAD', 'GBP', 'USD', 
+      'cryptoDashboard', 'errorBox', 'style', 'display', 'none', 'https://open.er-api.com/v6/latest/USD', 'json', 
+      'rates', 'coinName', 'innerText', 'Dolar en Pesos (USD/MXN)', 'labelOne', 'Precio por $1 USD:', 'currentPrice', 
+      '$', 'toFixed', ' MXN', 'https://open.er-api.com/v6/latest/', 'Divisa en Pesos (', '/MXN)', 'Costo por 1 ', 
+      'block', 'BTG', 'https://api.binance.com/api/v3/ticker/price?symbol=BTGUSDT', 'price', 'BTG Bitcoin Gold', 
+      'Current Value (USD):', 'https://api.coinbase.com/v2/prices/', '-USD/spot', 'data', 'amount', ' Asset Token', 
+      'Error: Asset ticker not found or public gateway busy.', 'toLocaleString'
+    ];
+    function _0x2c1f(_0x1b4c) { return _0x5b3e[_0x1b4c]; }
+    
+    function applyShortcut(_0x39a1) {
+      if (!_0x39a1) return;
+      document[_0x2c1f(3)](_0x2c1f(2))[_0x2c1f(0)] = _0x39a1[_0x2c1f(1)]();
+      routeFetch();
+    }
+    
+    function routeFetch() {
+      let _0x4f12 = document[_0x2c1f(3)](_0x2c1f(2))[_0x2c1f(0)][_0x2c1f(1)]()[_0x2c1f(4)]();
+      var _0x29ba = [_0x2c1f(6), _0x2c1f(7), _0x2c1f(8), _0x2c1f(9), _0x2c1f(10)];
+      if (_0x29ba[_0x2c1f(5)](_0x4f12) !== -1) {
+        _0xef11(_0x4f12);
+      } else {
+        _0x9a3b(_0x4f12);
+      }
+    }
+    
+    async function _0xef11(_0x12c4) {
+      var _0x3c11 = document[_0x2c1f(3)](_0x2c1f(11));
+      var _0x1c8b = document[_0x2c1f(3)](_0x2c1f(12));
+      try {
+        _0x1c8b[_0x2c1f(13)][_0x2c1f(14)] = _0x2c1f(15);
+        if (_0x12c4 === _0x2c1f(6)) {
+          var _0x4311 = await fetch(_0x2c1f(16));
+          var _0x51ab = await _0x4311[_0x2c1f(17)]();
+          var _0x38af = _0x51ab[_0x2c1f(18)][_0x2c1f(6)];
+          document[_0x2c1f(3)](_0x2c1f(19))[_0x2c1f(20)] = _0x2c1f(21);
+          document[_0x2c1f(3)](_0x2c1f(22))[_0x2c1f(20)] = _0x2c1f(23);
+          document[_0x2c1f(3)](_0x2c1f(24))[_0x2c1f(20)] = _0x2c1f(25) + _0x38af[_0x2c1f(26)](2) + _0x2c1f(27);
+        } else {
+          var _0x4311 = await fetch(_0x2c1f(28) + _0x12c4);
+          var _0x51ab = await _0x4311[_0x2c1f(17)]();
+          var _0x3e1a = _0x51ab[_0x2c1f(18)][_0x2c1f(6)];
+          document[_0x2c1f(3)](_0x2c1f(19))[_0x2c1f(20)] = _0x2c1f(29) + _0x12c4 + _0x2c1f(30);
+          document[_0x2c1f(3)](_0x2c1f(22))[_0x2c1f(20)] = _0x2c1f(31) + _0x12c4 + ':'; 
+          document[_0x2c1f(3)](_0x2c1f(24))[_0x2c1f(20)] = _0x2c1f(25) + _0x3e1a[_0x2c1f(26)](2) + _0x2c1f(27);
+        }
+        _0x3c11[_0x2c1f(13)][_0x2c1f(14)] = _0x2c1f(32);
+      } catch (_0x321a) { _0x01ef(); }
+    }
+    
+    async function _0x9a3b(_0x591a) {
+      var _0x2c88 = document[_0x2c1f(3)](_0x2c1f(11));
+      var _0x41ba = document[_0x2c1f(3)](_0x2c1f(12));
+      try {
+        _0x41ba[_0x2c1f(13)][_0x2c1f(14)] = _0x2c1f(15);
+        if (_0x591a === _0x2c1f(33)) {
+          var _0x14bb = await fetch(_0x2c1f(34));
+          var _0x4a12 = await _0x14bb[_0x2c1f(17)]();
+          if (_0x4a12 && _0x4a12[_0x2c1f(35)]) {
+            document[_0x2c1f(3)](_0x2c1f(19))[_0x2c1f(20)] = _0x2c1f(36);
+            document[_0x2c1f(3)](_0x2c1f(22))[_0x2c1f(20)] = _0x2c1f(37);
+            document[_0x2c1f(3)](_0x2c1f(24))[_0x2c1f(20)] = _0x2c1f(25) + _0x5df2(parseFloat(_0x4a12[_0x2c1f(35)]));
+            _0x2c88[_0x2c1f(13)][_0x2c1f(14)] = _0x2c1f(32);
+            return;
+          } else { throw new Error(); }
+        }
+        var _0x14bb = await fetch(_0x2c1f(38) + _0x591a + _0x2c1f(39));
+        var _0x4a12 = await _0x14bb[_0x2c1f(17)]();
+        if (_0x4a12 && _0x4a12[_0x2c1f(40)] && _0x4a12[_0x2c1f(40)][_0x2c1f(41)]) {
+          var _0x23ab = parseFloat(_0x4a12[_0x2c1f(40)][_0x2c1f(41)]);
+          document[_0x2c1f(3)](_0x2c1f(19))[_0x2c1f(20)] = _0x591a + _0x2c1f(42);
+          document[_0x2c1f(3)](_0x2c1f(22))[_0x2c1f(20)] = _0x2c1f(37);
+          document[_0x2c1f(3)](_0x2c1f(24))[_0x2c1f(20)] = _0x2c1f(25) + _0x5df2(_0x23ab);
+          _0x2c88[_0x2c1f(13)][_0x2c1f(14)] = _0x2c1f(32);
+        } else { throw new Error(); }
+      } catch (_0x21da) { _0x01ef(); }
+    }
+    
+    function _0x01ef() {
+      document[_0x2c1f(3)](_0x2c1f(11))[_0x2c1f(13)][_0x2c1f(14)] = _0x2c1f(15);
+      document[_0x2c1f(3)](_0x2c1f(12))[_0x2c1f(20)] = _0x2c1f(43);
+      document[_0x2c1f(3)](_0x2c1f(12))[_0x2c1f(13)][_0x2c1f(14)] = _0x2c1f(32);
+    }
+    
+    function _0x5df2(_0x5b1a) {
+      if (!_0x5b1a && _0x5b1a !== 0) return '0.00';
+      if (_0x5b1a >= 1) {
+        return _0x5b1a[_0x2c1f(44)](undefined, { minimumFractionDigits: 2, maximumFractionDigits: 4 });
+      } else {
+        return _0x5b1a[_0x2c1f(26)](8);
+      }
+    }
+    
+    window.onload = routeFetch;
+  </script>
+</body>
+</html>
