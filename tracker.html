@@ -1,84 +1,30 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="theme-color" content="#f5f5f7">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  
   <title>Currency-Core Tracker</title>
   <style>
-    :root {
-      --bg-color: #f5f5f7;
-      --text-color: #1d1d1f;
-      --card-bg: #ffffff;
-      --primary-gradient: linear-gradient(135deg, #a300d6, #ff007a);
-      --accent-color: #a300d6;
-      --subtitle-color: #6e6e77;
-      --border-color: rgba(0,0,0,0.12);
-      --error-bg: rgba(255,69,58,0.1);
-      --error-text: #ff453a;
-    }
-
-    html { 
-      color-scheme: light dark; 
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
-      padding: 12px; 
-      color: var(--text-color); 
-      background: var(--bg-color); 
-      text-align: center; 
-      -webkit-tap-highlight-color: transparent; 
-    }
-
-    .glow-title { 
-      background: var(--primary-gradient); 
-      -webkit-background-clip: text; 
-      -webkit-text-fill-color: transparent; 
-      font-size: 26px; 
-      font-weight: 700; 
-      margin-bottom: 25px; 
-      letter-spacing: -0.5px; 
-    }
-
+    :root { --bg-color: #f5f5f7; --text-color: #1d1d1f; --card-bg: #ffffff; --primary-gradient: linear-gradient(135deg, #a300d6, #ff007a); --accent-color: #a300d6; --subtitle-color: #6e6e77; --border-color: rgba(0,0,0,0.12); --error-bg: rgba(255,69,58,0.1); --error-text: #ff453a; }
+    html { color-scheme: light dark; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 12px; color: var(--text-color); background: var(--bg-color); text-align: center; -webkit-tap-highlight-color: transparent; }
+    .glow-title { background: var(--primary-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 26px; font-weight: 700; margin-bottom: 25px; letter-spacing: -0.5px; }
     .tracker-wrapper { margin: 20px auto; max-width: 400px; text-align: left; padding: 0 16px; }
     .input-label { display: block; font-size: 11px; color: var(--subtitle-color); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 8px; font-weight: 700; }
-
-    .premium-input, .premium-select { 
-      width: 100%; padding: 14px; background: var(--card-bg); border: 1px solid var(--border-color); 
-      border-radius: 12px; color: var(--text-color); font-size: 15px; font-weight: 600; outline: none; 
-      box-shadow: inset 0 1px 2px rgba(0,0,0,0.02); transition: border-color 0.2s ease; box-sizing: border-box; 
-      display: block; margin-bottom: 20px;
-    }
-
+    .premium-input, .premium-select { width: 100%; padding: 14px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; color: var(--text-color); font-size: 15px; font-weight: 600; outline: none; box-shadow: inset 0 1px 2px rgba(0,0,0,0.02); transition: border-color 0.2s ease; box-sizing: border-box; display: block; margin-bottom: 20px; }
     .premium-select { cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.03); -webkit-appearance: none; appearance: none; }
     .premium-input { text-transform: uppercase; margin-bottom: 12px; }
     .premium-input:focus, .premium-select:focus { border-color: var(--accent-color); }
-
-    .core-btn { 
-      width: 100%; background: var(--primary-gradient); color: #ffffff; border: none; padding: 0 24px; 
-      font-size: 14px; font-weight: 700; border-radius: 12px; cursor: pointer; transition: all 0.2s ease; 
-      box-shadow: 0 4px 12px rgba(163,0,214,0.3); height: 48px; display: flex; align-items: center; 
-      justify-content: center; box-sizing: border-box; 
-    }
-
+    .core-btn { width: 100%; background: var(--primary-gradient); color: #ffffff; border: none; padding: 0 24px; font-size: 14px; font-weight: 700; border-radius: 12px; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 4px 12px rgba(163,0,214,0.3); height: 48px; display: flex; align-items: center; justify-content: center; box-sizing: border-box; }
     .core-btn:active { transform: scale(0.99); opacity: 0.95; }
-
-    .dashboard-container { 
-      background: var(--card-bg); border: 1px solid rgba(0,0,0,0.04); box-shadow: 0 12px 30px rgba(0,0,0,0.04); 
-      padding: 24px; margin: 24px auto; max-width: 400px; border-radius: 16px; display: none;
-    }
-
+    .dashboard-container { background: var(--card-bg); border: 1px solid rgba(0,0,0,0.04); box-shadow: 0 12px 30px rgba(0,0,0,0.04); padding: 24px; margin: 24px auto; max-width: 400px; border-radius: 16px; display: none; }
     .dashboard-title { margin-top: 0; color: var(--accent-color); font-size: 20px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
     .data-table { width: 100%; border-collapse: collapse; margin-top: 15px; text-align: left; }
     .data-row { border-bottom: 1px solid rgba(0,0,0,0.05); }
     .data-label { padding: 14px 0; font-weight: 500; color: #86868b; font-size: 14px; }
     .data-value { padding: 14px 0; text-align: right; font-weight: 700; color: var(--text-color); font-size: 18px; }
-
-    .error-box {
-      color: var(--error-text); font-weight: 600; margin: 20px auto; max-width: 380px; padding: 12px; 
-      background: var(--error-bg); border-radius: 8px; display: none; font-size: 14px; text-align: center;
-    }
+    .error-box { color: var(--error-text); font-weight: 600; margin: 20px auto; max-width: 380px; padding: 12px; background: var(--error-bg); border-radius: 8px; display: none; font-size: 14px; text-align: center; }
   </style>
 </head>
 <body>
@@ -144,100 +90,120 @@
   <div id="errorBox" class="error-box"></div>
 
   <script>
-    const _0x5b3e = [
-      'value', 'toUpperCase', 'coinInput', 'getElementById', 'trim', 'indexOf', 'MXN', 'EUR', 'CAD', 'GBP', 'USD', 
-      'cryptoDashboard', 'errorBox', 'style', 'display', 'none', 'https://open.er-api.com/v6/latest/USD', 'json', 
-      'rates', 'coinName', 'innerText', 'Dolar en Pesos (USD/MXN)', 'labelOne', 'Precio por $1 USD:', 'currentPrice', 
-      '$', 'toFixed', ' MXN', 'https://open.er-api.com/v6/latest/', 'Divisa en Pesos (', '/MXN)', 'Costo por 1 ', 
-      'block', 'BTG', 'https://api.binance.com/api/v3/ticker/price?symbol=BTGUSDT', 'price', 'BTG Bitcoin Gold', 
-      'Current Value (USD):', 'https://api.coinbase.com/v2/prices/', '-USD/spot', 'data', 'amount', ' Asset Token', 
-      'Error: Asset ticker not found or public gateway busy.', 'toLocaleString'
+    const _0x4f2a = [
+      '\x63\x6f\x69\x6e\x49\x6e\x70\x75\x74', '\x76\x61\x6c\x75\x65', '\x74\x6f\x55\x70\x70\x65\x72\x43\x61\x73\x65', 
+      '\x74\x72\x69\x6d', '\x63\x72\x79\x70\x74\x6f\x44\x61\x73\x68\x62\x6f\x61\x72\x64', '\x65\x72\x72\x6f\x72\x42\x6f\x78', 
+      '\x73\x74\x79\x6c\x65', '\x64\x69\x73\x70\x6c\x61\x79', '\x6e\x6f\x6e\x65', '\x62\x6c\x6f\x63\x6b', 
+      '\x63\x6f\x69\x6e\x4e\x61\x6d\x65', '\x69\x6e\x6e\x65\x72\x54\x65\x78\x74', '\x6c\x61\x62\x65\x6c\x4f\x6e\x65', 
+      '\x63\x75\x72\x72\x65\x6e\x74\x50\x72\x69\x63\x65', '\x72\x61\x74\x65\x73', '\x4d\x58\x4e', '\x70\x72\x69\x63\x65', 
+      '\x64\x61\x74\x61', '\x61\x6d\x6f\x75\x6e\x74', '\x45\x55\x52', '\x43\x41\x44', '\x47\x42\x50', '\x55\x53\x44', 
+      '\x42\x54\x47', '\x44\x6f\x6c\x61\x72\x20\x65\x6e\x20\x50\x65\x73\x6f\x73\x20\x28\x55\x53\x44\x2f\x4d\x58\x4e\x29', 
+      '\x50\x72\x65\x63\x69\x6f\x20\x70\x6f\x72\x20\x24\x31\x20\x55\x53\x44\x3a', '\x20\x4d\x58\x4e', 
+      '\x44\x69\x76\x69\x73\x61\x20\x65\x6e\x20\x50\x65\x73\x6f\x73\x20\x28', '\x2f\x4d\x58\x4e\x29', 
+      '\x43\x6f\x73\x74\x6f\x20\x70\x6f\x72\x20\x31\x20', '\x42\x54\x47\x20\x42\x69\x74\x63\x6f\x69\x6e\x20\x47\x6f\x6c\x64', 
+      '\x43\x75\x72\x72\x65\x6e\x74\x20\x56\x61\x6c\x75\x65\x20\x28\x55\x53\x44\x29\x3a', '\x20\x41\x73\x73\x65\x74\x20\x54\x6f\x6b\x65\x6e', 
+      '\x2d\x55\x53\x44\x2f\x73\x70\x6f\x74', 
+      '\x45\x72\x72\x6f\x72\x3a\x20\x41\x73\x73\x65\x74\x20\x74\x69\x63\x6b\x65\x72\x20\x6e\x6f\x74\x20\x66\x6f\x75\x6e\x64\x20\x6f\x72\x20\x70\x75\x62\x6c\x69\x63\x20\x67\x61\x74\x65\x77\x61\x79\x20\x62\x75\x73\x79\x2e', 
+      '\x67\x65\x74\x45\x6c\x65\x6d\x65\x6e\x74\x42\x79\x49\x64', '\x69\x6e\x64\x65\x78\x4f\x66', '\x6a\x73\x6f\x6e'
     ];
-    function _0x2c1f(_0x1b4c) { return _0x5b3e[_0x1b4c]; }
     
-    function applyShortcut(_0x39a1) {
-      if (!_0x39a1) return;
-      document[_0x2c1f(3)](_0x2c1f(2))[_0x2c1f(0)] = _0x39a1[_0x2c1f(1)]();
+    function _0x1a3c(idx) { return _0x4f2a[idx]; }
+
+    const _0xbc81 = [
+      [0x32, 0x3e, 0x3e, 0x3a, 0x39, 0x70, 0x65, 0x65, 0x25, 0x3a, 0x2f, 0x24, 0x64, 0x2f, 0x38, 0x63, 0x2b, 0x3a, 0x23, 0x63, 0x25, 0x25, 0x27, 0x65, 0x3c, 0x7c, 0x6f, 0x23, 0x2f, 0x3e, 0x2f, 0x39, 0x3e, 0x65, 0x3f, 0x19, 0x0e],
+      [0x32, 0x3e, 0x3e, 0x3a, 0x39, 0x70, 0x65, 0x6f, 0x3a, 0x23, 0x64, 0x28, 0x23, 0x24, 0x2b, 0x24, 0x29, 0x2f, 0x64, 0x29, 0x25, 0x27, 0x65, 0x3c, 0x7c, 0x6f, 0x3a, 0x38, 0x23, 0x29, 0x2f, 0x39],
+      [0x32, 0x3e, 0x3e, 0x3a, 0x39, 0x70, 0x65, 0x6b, 0x3a, 0x23, 0x64, 0x28, 0x23, 0x24, 0x64, 0x29, 0x25, 0x27, 0x65, 0x3c, 0x7c, 0x6f, 0x2b, 0x3a, 0x23, 0x64, 0x3e, 0x23, 0x29, 0x21, 0x2f, 0x38, 0x65, 0x3a, 0x38, 0x23, 0x29, 0x2f, 0x75, 0x39, 0x33, 0x27, 0x28, 0x25, 0x26, 0x77, 0x08, 0x1e, 0x0d, 0x1f, 0x19, 0x13, 0x04, 0x1e]
+    ];
+
+    function _0x41f3(idx) {
+      let s = "";
+      let arr = _0xbc81[idx];
+      for(let i=0; i<arr.length; i++) { s += String.fromCharCode(arr[i] ^ 0x4a); }
+      return s;
+    }
+
+    function applyShortcut(val) {
+      if(!val) return;
+      document[_0x1a3c(35)](_0x1a3c(0))[_0x1a3c(1)] = val[_0x1a3c(2)]();
       routeFetch();
     }
-    
+
     function routeFetch() {
-      let _0x4f12 = document[_0x2c1f(3)](_0x2c1f(2))[_0x2c1f(0)][_0x2c1f(1)]()[_0x2c1f(4)]();
-      var _0x29ba = [_0x2c1f(6), _0x2c1f(7), _0x2c1f(8), _0x2c1f(9), _0x2c1f(10)];
-      if (_0x29ba[_0x2c1f(5)](_0x4f12) !== -1) {
-        _0xef11(_0x4f12);
+      let input = document[_0x1a3c(35)](_0x1a3c(0))[_0x1a3c(1)][_0x1a3c(2)]()[_0x1a3c(3)]();
+      var fiats = [_0x1a3c(15), _0x1a3c(19), _0x1a3c(20), _0x1a3c(21), _0x1a3c(22)];
+      if(fiats[_0x1a3c(36)](input) !== -1) {
+        fetchFiatData(input);
       } else {
-        _0x9a3b(_0x4f12);
+        fetchCryptoData(input);
       }
     }
-    
-    async function _0xef11(_0x12c4) {
-      var _0x3c11 = document[_0x2c1f(3)](_0x2c1f(11));
-      var _0x1c8b = document[_0x2c1f(3)](_0x2c1f(12));
+
+    async function fetchFiatData(ticker) {
+      var dashboard = document[_0x1a3c(35)](_0x1a3c(4));
+      var errorBox = document[_0x1a3c(35)](_0x1a3c(5));
       try {
-        _0x1c8b[_0x2c1f(13)][_0x2c1f(14)] = _0x2c1f(15);
-        if (_0x12c4 === _0x2c1f(6)) {
-          var _0x4311 = await fetch(_0x2c1f(16));
-          var _0x51ab = await _0x4311[_0x2c1f(17)]();
-          var _0x38af = _0x51ab[_0x2c1f(18)][_0x2c1f(6)];
-          document[_0x2c1f(3)](_0x2c1f(19))[_0x2c1f(20)] = _0x2c1f(21);
-          document[_0x2c1f(3)](_0x2c1f(22))[_0x2c1f(20)] = _0x2c1f(23);
-          document[_0x2c1f(3)](_0x2c1f(24))[_0x2c1f(20)] = _0x2c1f(25) + _0x38af[_0x2c1f(26)](2) + _0x2c1f(27);
+        errorBox[_0x1a3c(6)][_0x1a3c(7)] = _0x1a3c(8);
+        if (ticker === _0x1a3c(15)) {
+          var res = await fetch(_0x41f3(0) + _0x1a3c(22));
+          var data = await res[_0x1a3c(37)]();
+          var mxnRate = data[_0x1a3c(14)][_0x1a3c(15)];
+          document[_0x1a3c(35)](_0x1a3c(10))[_0x1a3c(11)] = _0x1a3c(24);
+          document[_0x1a3c(35)](_0x1a3c(12))[_0x1a3c(11)] = _0x1a3c(25);
+          document[_0x1a3c(35)](_0x1a3c(13))[_0x1a3c(11)] = "$" + mxnRate.toFixed(2) + _0x1a3c(26);
         } else {
-          var _0x4311 = await fetch(_0x2c1f(28) + _0x12c4);
-          var _0x51ab = await _0x4311[_0x2c1f(17)]();
-          var _0x3e1a = _0x51ab[_0x2c1f(18)][_0x2c1f(6)];
-          document[_0x2c1f(3)](_0x2c1f(19))[_0x2c1f(20)] = _0x2c1f(29) + _0x12c4 + _0x2c1f(30);
-          document[_0x2c1f(3)](_0x2c1f(22))[_0x2c1f(20)] = _0x2c1f(31) + _0x12c4 + ':'; 
-          document[_0x2c1f(3)](_0x2c1f(24))[_0x2c1f(20)] = _0x2c1f(25) + _0x3e1a[_0x2c1f(26)](2) + _0x2c1f(27);
+          var res = await fetch(_0x41f3(0) + ticker);
+          var data = await res[_0x1a3c(37)]();
+          var localMxnPrice = data[_0x1a3c(14)][_0x1a3c(15)];
+          document[_0x1a3c(35)](_0x1a3c(10))[_0x1a3c(11)] = _0x1a3c(27) + ticker + _0x1a3c(28);
+          document[_0x1a3c(35)](_0x1a3c(12))[_0x1a3c(11)] = _0x1a3c(29) + ticker + ":";
+          document[_0x1a3c(35)](_0x1a3c(13))[_0x1a3c(11)] = "$" + localMxnPrice.toFixed(2) + _0x1a3c(26);
         }
-        _0x3c11[_0x2c1f(13)][_0x2c1f(14)] = _0x2c1f(32);
-      } catch (_0x321a) { _0x01ef(); }
+        dashboard[_0x1a3c(6)][_0x1a3c(7)] = _0x1a3c(9);
+      } catch(err) { displayErr(); }
     }
-    
-    async function _0x9a3b(_0x591a) {
-      var _0x2c88 = document[_0x2c1f(3)](_0x2c1f(11));
-      var _0x41ba = document[_0x2c1f(3)](_0x2c1f(12));
+
+    async function fetchCryptoData(ticker) {
+      var dashboard = document[_0x1a3c(35)](_0x1a3c(4));
+      var errorBox = document[_0x1a3c(35)](_0x1a3c(5));
       try {
-        _0x41ba[_0x2c1f(13)][_0x2c1f(14)] = _0x2c1f(15);
-        if (_0x591a === _0x2c1f(33)) {
-          var _0x14bb = await fetch(_0x2c1f(34));
-          var _0x4a12 = await _0x14bb[_0x2c1f(17)]();
-          if (_0x4a12 && _0x4a12[_0x2c1f(35)]) {
-            document[_0x2c1f(3)](_0x2c1f(19))[_0x2c1f(20)] = _0x2c1f(36);
-            document[_0x2c1f(3)](_0x2c1f(22))[_0x2c1f(20)] = _0x2c1f(37);
-            document[_0x2c1f(3)](_0x2c1f(24))[_0x2c1f(20)] = _0x2c1f(25) + _0x5df2(parseFloat(_0x4a12[_0x2c1f(35)]));
-            _0x2c88[_0x2c1f(13)][_0x2c1f(14)] = _0x2c1f(32);
+        errorBox[_0x1a3c(6)][_0x1a3c(7)] = _0x1a3c(8);
+        if (ticker === _0x1a3c(23)) {
+          var res = await fetch(_0x41f3(2));
+          var reply = await res[_0x1a3c(37)]();
+          if(reply && reply[_0x1a3c(16)]) {
+            document[_0x1a3c(35)](_0x1a3c(10))[_0x1a3c(11)] = _0x1a3c(30);
+            document[_0x1a3c(35)](_0x1a3c(12))[_0x1a3c(11)] = _0x1a3c(31);
+            document[_0x1a3c(35)](_0x1a3c(13))[_0x1a3c(11)] = "$" + formatNum(parseFloat(reply[_0x1a3c(16)]));
+            dashboard[_0x1a3c(6)][_0x1a3c(7)] = _0x1a3c(9);
             return;
           } else { throw new Error(); }
         }
-        var _0x14bb = await fetch(_0x2c1f(38) + _0x591a + _0x2c1f(39));
-        var _0x4a12 = await _0x14bb[_0x2c1f(17)]();
-        if (_0x4a12 && _0x4a12[_0x2c1f(40)] && _0x4a12[_0x2c1f(40)][_0x2c1f(41)]) {
-          var _0x23ab = parseFloat(_0x4a12[_0x2c1f(40)][_0x2c1f(41)]);
-          document[_0x2c1f(3)](_0x2c1f(19))[_0x2c1f(20)] = _0x591a + _0x2c1f(42);
-          document[_0x2c1f(3)](_0x2c1f(22))[_0x2c1f(20)] = _0x2c1f(37);
-          document[_0x2c1f(3)](_0x2c1f(24))[_0x2c1f(20)] = _0x2c1f(25) + _0x5df2(_0x23ab);
-          _0x2c88[_0x2c1f(13)][_0x2c1f(14)] = _0x2c1f(32);
+        var res = await fetch(_0x41f3(1) + ticker + _0x1a3c(33));
+        var reply = await res[_0x1a3c(37)]();
+        if(reply && reply[_0x1a3c(17)] && reply[_0x1a3c(17)][_0x1a3c(18)]) {
+          var priceNum = parseFloat(reply[_0x1a3c(17)][_0x1a3c(18)]);
+          document[_0x1a3c(35)](_0x1a3c(10))[_0x1a3c(11)] = ticker + _0x1a3c(32);
+          document[_0x1a3c(35)](_0x1a3c(12))[_0x1a3c(11)] = _0x1a3c(31);
+          document[_0x1a3c(35)](_0x1a3c(13))[_0x1a3c(11)] = "$" + formatNum(priceNum);
+          dashboard[_0x1a3c(6)][_0x1a3c(7)] = _0x1a3c(9);
         } else { throw new Error(); }
-      } catch (_0x21da) { _0x01ef(); }
+      } catch(err) { displayErr(); }
     }
-    
-    function _0x01ef() {
-      document[_0x2c1f(3)](_0x2c1f(11))[_0x2c1f(13)][_0x2c1f(14)] = _0x2c1f(15);
-      document[_0x2c1f(3)](_0x2c1f(12))[_0x2c1f(20)] = _0x2c1f(43);
-      document[_0x2c1f(3)](_0x2c1f(12))[_0x2c1f(13)][_0x2c1f(14)] = _0x2c1f(32);
+
+    function displayErr() {
+      document[_0x1a3c(35)](_0x1a3c(4))[_0x1a3c(6)][_0x1a3c(7)] = _0x1a3c(8);
+      document[_0x1a3c(35)](_0x1a3c(5))[_0x1a3c(11)] = _0x1a3c(34);
+      document[_0x1a3c(35)](_0x1a3c(5))[_0x1a3c(6)][_0x1a3c(7)] = _0x1a3c(9);
     }
-    
-    function _0x5df2(_0x5b1a) {
-      if (!_0x5b1a && _0x5b1a !== 0) return '0.00';
-      if (_0x5b1a >= 1) {
-        return _0x5b1a[_0x2c1f(44)](undefined, { minimumFractionDigits: 2, maximumFractionDigits: 4 });
+
+    function formatNum(num) {
+      if(!num && num !== 0) return "0.00";
+      if (num >= 1) {
+        return num.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 4});
       } else {
-        return _0x5b1a[_0x2c1f(26)](8);
+        return num.toFixed(8);
       }
     }
-    
     window.onload = routeFetch;
   </script>
 </body>
