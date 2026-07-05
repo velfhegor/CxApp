@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#f5f5f7">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <title>Stock-Core Tracker</title>
+    <style>
+        :root {
+            --bg-color: #f5f5f7;
+            --text-color: #1d1d1f;
+            --card-bg: #ffffff;
+            --primary-gradient: linear-gradient(135deg, #0071e3, #00b0ff);
+            --accent-color: #0071e3;
+            --subtitle-color: #6e6e77;
+            --border-color: rgba(0,0,0,0.12);
+            --error-bg: rgba(255,69,58,0.1);
+            --error-text: #ff453a;
+            --success-color: #34c759;
+            --warning-color: #ff9500;
+            --card-shadow: 0 12px 30px rgba(0,0,0,0.06);
+            --transition-speed: 0.3s;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            color-scheme: light dark;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            padding: 12px;
+            color: var(--text-color);
+            background: var(--bg-color);
+            text-align: center;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .glow-title {
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-size: 26px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+
+        .version-badge {
+            font-size: 10px;
+            color: var(--subtitle-color);
+            font-weight: 500;
+            margin-bottom: 20px;
+            opacity: 0.7;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            margin-right: 4px;
+            background: var(--success-color);
+        }
+
+        .status-indicator.retrying {
+            background: var(--warning-color);
+            animation: pulse 1s ease-in-out infinite;
+        }
+
+        .tracker-wrapper {
+            margin: 20px auto;
+            max-width: 400px;
+            text-align: left;
+            padding: 0 16px;
+            width: 100%;
+        }
+
+        .input-label {
+            display: block;
+            font-size: 11px;
+            color: var(--subtitle-color);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+
+        .input-group {
+            position: relative;
+            margin-bottom: 12px;
+        }
+
+        .premium-input, .premium-select {
+            width: 100%;
+            padding: 14px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            color: var(--text-color);
+            font-size: 15px;
+            font-weight: 600;
+            outline: none;
+            box-shadow: inset 0 1px 2px rgba(0,0,0,0.02);
+            transition: all var(--transition-speed) ease;
+        }
+
+        .premium-select {
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+            -webkit-appearance: none;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236e6e77' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 14px center;
+            padding-right: 40px;
+        }
+
+        .premium-input {
+            text-transform: uppercase;
+            padding-right: 40px;
+        }
+
+        .premium-input:focus, .premium-select:focus {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(0,113,227,0.1);
+        }
+
+        .clear-btn {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--subtitle-color);
+            cursor: pointer;
+            padding: 4px 8px;
+            font-size: 18px;
+            opacity: 0;
+            transition: opacity var(--transition-speed) ease;
+            pointer-events: none;
+        }
+
+        .clear-btn.visible {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .clear-btn:hover {
+            color: var(--text-color);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .core-btn {
+            flex: 1;
+            background: var(--primary-gradient);
+            color: #ffffff;
+            border: none;
+            padding: 0 24px;
+            font-size: 14px;
+            font-weight: 700;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all var(--transition-speed) ease;
+            box-shadow: 0 4px 12px rgba(0,113,227,0.3);
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .core-btn:active {
+            transform: scale(0.98);
+        }
+
+        .core-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .refresh-btn {
+            background: var(--card-bg);
+            color: var(--accent-color);
+            border: 1px solid var(--border-color);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            width: 48px;
+            flex: 0 0 48px;
+            padding: 0;
+            font-size: 18px;
+        }
+
+        .dashboard-container {
+            background: var(--card-bg);
+            border: 1px solid rgba(0,0,0,0.04);
+            box-shadow: var(--card-shadow);
+            padding: 24px;
+            margin: 24px auto;
+            max-width: 400px;
+            border-radius: 16px;
+            display: none;
+            width: 100%;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .loading .data-value {
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        .dashboard-title {
+            margin-top: 0;
+            color: var(--accent-color);
+            font-size: 20px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .last-updated {
+            font-size: 11px;
+            color: var(--subtitle-color);
+            margin-bottom: 16px;
+            opacity: 0.7;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            text-align: left;
+        }
+
+        .data-row {
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .data-row:last-child {
+            border-bottom: none;
+        }
+
+        .data-label {
+            padding: 14px 0;
+            font-weight: 500;
+            color: #86868b;
+            font-size: 14px;
+        }
+
+        .data-value {
+            padding: 14px 0;
+            text-align: right;
+            font-weight: 700;
+            color: var(--text-color);
+            font-size: 18px;
+        }
+
+        .price-change {
+            font-size: 12px;
+            margin-left: 4px;
+            font-weight: 600;
+        }
+
+        .price-up {
+            color: var(--success-color);
+        }
+
+        .price-down {
+            color: var(--error-text);
+        }
+
+        .error-box {
+            color: var(--error-text);
+            font-weight: 600;
+            margin: 20px auto;
+            max-width: 380px;
+            padding: 12px;
+            background: var(--error-bg);
+            border-radius: 8px;
+            display: none;
+            font-size: 14px;
+            text-align: center;
+            border: 1px solid rgba(255,69,58,0.2);
+        }
+
+        .retry-count {
+            font-size: 11px;
+            opacity: 0.7;
+            margin-top: 4px;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1d1d1f;
+            color: #ffffff;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        .toast.show {
+            opacity: 1;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-color: #1c1c1e;
+                --text-color: #f5f5f7;
+                --card-bg: #2c2c2e;
+                --border-color: rgba(255,255,255,0.12);
+                --card-shadow: 0 12px 30px rgba(0,0,0,0.3);
+            }
+            .refresh-btn {
+                background: var(--card-bg);
+            }
+            .toast {
+                background: #f5f5f7;
+                color: #1d1d1f;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1 class="glow-title">Stock-Core Tracker</h1>
+    <div class="version-badge">
+        <span class="status-indicator" id="statusDot"></span>
+        v2.1.0 â€¢ Hardened
+    </div>
+
+    <div class="tracker-wrapper">
+        <label class="input-label" for="quickSelect">QUICK SELECT STOCK</label>
+        <select id="quickSelect" class="premium-select" onchange="applyShortcut(this.value)">
+            <option value="">-- Choose a Popular Ticker --</option>
+            <optgroup label="ðŸ–¥ï¸ Tech Stocks">
+                <option value="AAPL">Apple (AAPL)</option>
+                <option value="MSFT">Microsoft (MSFT)</option>
+                <option value="NVDA">NVIDIA (NVDA)</option>
+                <option value="TSLA">Tesla (TSLA)</option>
+                <option value="AMZN">Amazon (AMZN)</option>
+            </optgroup>
+        </select>
+
+        <label class="input-label" for="coinInput">ENTER STOCK TICKER</label>
+        <div class="input-group">
+            <input id="coinInput" type="text" value="AAPL" placeholder="e.g. AMZN, TSLA, NVDA" class="premium-input" onkeypress="handleEnter(event)" oninput="toggleClearButton()" aria-label="Stock Ticker Input" autocomplete="off">
+            <button class="clear-btn" onclick="clearInput()" aria-label="Clear input">Ã—</button>
+        </div>
+
+        <div class="button-group">
+            <button id="fetchBtn" onclick="routeFetch()" class="core-btn">
+                <span>ðŸ”</span> FETCH
+            </button>
+            <button onclick="refreshPrice()" class="core-btn refresh-btn" aria-label="Refresh price">â†»</button>
+        </div>
+    </div>
+
+    <div id="cryptoDashboard" class="dashboard-container">
+        <h2 id="coinName" class="dashboard-title">---</h2>
+        <div id="lastUpdated" class="last-updated"></div>
+        <table class="data-table">
+            <tr class="data-row">
+                <td id="labelOne" class="data-label">Live Price:</td>
+                <td id="currentPrice" class="data-value">$0.00</td>
+            </tr>
+            <tr class="data-row" id="changeRow" style="display: none;">
+                <td class="data-label">Daily Change:</td>
+                <td id="priceChange" class="data-value">0.00%</td>
+            </tr>
+            <tr class="data-row" id="sourceRow" style="display: none;">
+                <td class="data-label">Source:</td>
+                <td id="dataSource" class="data-value" style="font-size: 12px;"></td>
+            </tr>
+        </table>
+    </div>
+
+    <div id="errorBox" class="error-box" role="alert"></div>
+    <div id="toast" class="toast"></div>
+
+    <script>
+        const CACHE_DURATION = 60000;
+        const priceCache = new Map();
+        let isFetching = false;
+        let currentTicker = '';
+        let currentAbortController = null;
+        let retryCount = 0;
+        const MAX_RETRIES = 3;
+
+        const PROXY_LIST = [
+            'https://api.allorigins.win/get?url=',
+            'https://api.codetabs.com/v1/proxy?quest=',
+            'https://corsproxy.io/?',
+            'https://thingproxy.freeboard.io/fetch/',
+            'https://cxapp.onrender.com/stock/'
+        ];
+
+        let currentProxyIndex = 0;
+
+        function getCachedPrice(ticker) {
+            const cached = priceCache.get(ticker);
+            if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
+                return cached.data;
+            }
+            if (cached) priceCache.delete(ticker);
+            return null;
+        }
+
+        function setCachedPrice(ticker, data) {
+            if (!data || !data.price) return;
+            priceCache.set(ticker, { data, timestamp: Date.now() });
+        }
+
+        function toggleClearButton() {
+            const input = document.getElementById('coinInput');
+            const clearBtn = document.querySelector('.clear-btn');
+            clearBtn.classList.toggle('visible', input.value.length > 0);
+        }
+
+        function clearInput() {
+            const input = document.getElementById('coinInput');
+            input.value = '';
+            toggleClearButton();
+            input.focus();
+        }
+
+        function showToast(message, duration = 2000) {
+            const toast = document.getElementById('toast');
+            if (toast) {
+                toast.textContent = message;
+                toast.classList.add('show');
+                setTimeout(() => toast.classList.remove('show'), duration);
+            }
+        }
+
+        function updateLastUpdated() {
+            document.getElementById('lastUpdated').textContent = 
+                `Last updated: ${new Date().toLocaleTimeString()}`;
+        }
+
+        function setStatusDot(state) {
+            const dot = document.getElementById('statusDot');
+            dot.className = 'status-indicator';
+            if (state === 'retrying') {
+                dot.classList.add('retrying');
+            }
+        }
+
+        function handleEnter(e) {
+            if (e.key === 'Enter') {
+                document.getElementById('coinInput').blur();
+                routeFetch();
+            }
+        }
+
+        function applyShortcut(val) {
+            if (!val) return;
+            document.getElementById('coinInput').value = val.toUpperCase();
+            toggleClearButton();
+            document.getElementById('quickSelect').value = '';
+            routeFetch();
+        }
+
+        function fetchWithTimeout(url, options = {}, timeout = 8000) {
+            return new Promise((resolve, reject) => {
+                const timer = setTimeout(() => {
+                    reject(new Error('Request timed out after ' + timeout + 'ms'));
+                }, timeout);
+
+                fetch(url, options)
+                    .then(response => {
+                        clearTimeout(timer);
+                        resolve(response);
+                    })
+                    .catch(err => {
+                        clearTimeout(timer);
+                        reject(err);
+                    });
+            });
+        }
+
+        function safeJSONParse(str) {
+            try {
+                if (typeof str === 'string' && 
+                    (str.trim().startsWith('<!DOCTYPE') || 
+                     str.trim().startsWith('<html') || 
+                     str.trim().startsWith('<'))) {
+                    return null;
+                }
+                return JSON.parse(str);
+            } catch (e) {
+                return null;
+            }
+        }
+
+        function extractPriceFromYahoo(json) {
+            if (!json) return null;
+            
+            const meta = json?.chart?.result?.[0]?.meta;
+            if (meta && meta.regularMarketPrice !== undefined) {
+                const pctChange = meta.previousClose 
+                    ? ((meta.regularMarketPrice - meta.previousClose) / meta.previousClose) * 100 
+                    : 0;
+                return {
+                    price: meta.regularMarketPrice,
+                    change: pctChange,
+                    source: "Live Market Engine"
+                };
+            }
+            return null;
+        }
+
+        async function attemptFetchWithProxy(ticker, proxyBase, signal) {
+            const targetUrl = `https://query2.finance.yahoo.com/v8/finance/chart/${ticker}?region=US&lang=en-US&includePrePost=false&interval=1m&range=1d&cb=${Date.now()}`;
+            
+            let fullUrl;
+            let sourceName;
+            
+            if (proxyBase.includes('/stock/')) {
+                fullUrl = `${proxyBase}${ticker}`;
+                sourceName = "Your Private Server";
+            } else if (proxyBase.includes('allorigins')) {
+                fullUrl = `${proxyBase}${encodeURIComponent(targetUrl)}&disableCache=true&t=${Date.now()}`;
+                sourceName = "AllOrigins Proxy";
+            } else if (proxyBase.includes('codetabs')) {
+                fullUrl = `${proxyBase}${encodeURIComponent(targetUrl)}&t=${Date.now()}`;
+                sourceName = "CodeTabs Proxy";
+            } else if (proxyBase.includes('corsproxy')) {
+                fullUrl = `${proxyBase}${encodeURIComponent(targetUrl)}`;
+                sourceName = "CORS Proxy";
+            } else if (proxyBase.includes('thingproxy')) {
+                fullUrl = `${proxyBase}${encodeURIComponent(targetUrl)}`;
+                sourceName = "ThingProxy";
+            } else {
+                fullUrl = `${proxyBase}${encodeURIComponent(targetUrl)}&disableCache=true&t=${Date.now()}`;
+                sourceName = "Backup Proxy";
+            }
+
+            const res = await fetchWithTimeout(fullUrl, { signal }, 8000);
+
+            if (!res.ok) return null;
+
+            const rawData = await res.json();
+
+            if (rawData && rawData.price !== undefined) {
+                rawData.source = sourceName;
+                return rawData;
+            }
+
+            if (rawData && rawData.contents) {
+                const json = safeJSONParse(rawData.contents);
+                const result = extractPriceFromYahoo(json);
+                if (result) {
+                    result.source = sourceName;
+                }
+                return result;
+            }
+
+            const result = extractPriceFromYahoo(rawData);
+            if (result) {
+                result.source = sourceName;
+            }
+            return result;
+        }
+
+        async function performFetchWithRetries(ticker, signal) {
+            retryCount = 0;
+            
+            for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+                if (signal.aborted) return null;
+                
+                retryCount = attempt + 1;
+                const proxyIndex = (currentProxyIndex + attempt) % PROXY_LIST.length;
+                const proxyBase = PROXY_LIST[proxyIndex];
+                
+                if (attempt > 0) {
+                    setStatusDot('retrying');
+                    showToast(`Retrying with backup (${retryCount}/${MAX_RETRIES})...`, 1500);
+                    await new Promise(r => setTimeout(r, 500 * Math.pow(2, attempt - 1)));
+                }
+
+                try {
+                    const result = await attemptFetchWithProxy(ticker, proxyBase, signal);
+                    if (result) {
+                        currentProxyIndex = proxyIndex;
+                        setStatusDot('online');
+                        return result;
+                    }
+                } catch (e) {
+                    if (e.name === 'AbortError') throw e;
+                }
+            }
+            
+            setStatusDot('online');
+            return null;
+        }
+
+        async function routeFetch(forceRefresh = false) {
+            if (currentAbortController) {
+                currentAbortController.abort();
+                currentAbortController = null;
+            }
+
+            const input = document.getElementById('coinInput').value.toUpperCase().trim();
+            if (!input) {
+                showToast('Please enter an asset ticker');
+                return;
+            }
+
+            currentTicker = input;
+
+            if (!forceRefresh) {
+                const cachedData = getCachedPrice(input);
+                if (cachedData) {
+                    displayPrice(cachedData);
+                    showToast('Loaded from cache');
+                    return;
+                }
+            } else {
+                priceCache.delete(input);
+            }
+
+            const dashboard = document.getElementById('cryptoDashboard');
+            const errorBox = document.getElementById('errorBox');
+            const fetchBtn = document.getElementById('fetchBtn');
+
+            currentAbortController = new AbortController();
+            const signal = currentAbortController.signal;
+
+            isFetching = true;
+            fetchBtn.innerHTML = '<span>â³</span> FETCHING...';
+            fetchBtn.disabled = true;
+            errorBox.style.display = "none";
+            dashboard.classList.add('loading');
+            setStatusDot('online');
+
+            let result = null;
+
+            try {
+                result = await performFetchWithRetries(input, signal);
+
+                if (!result && !signal.aborted) {
+                    throw new Error("All sources failed after " + retryCount + " attempts");
+                }
+
+                if (!result) return;
+
+                localStorage.setItem('tracker_last_ticker', input);
+                setCachedPrice(input, result);
+                displayPrice(result);
+
+            } catch (err) {
+                if (err.name === 'AbortError') return;
+
+                const cachedData = priceCache.get(input);
+                if (cachedData) {
+                    displayPrice(cachedData.data);
+                    showToast('Showing cached data - live fetch failed');
+                    return;
+                }
+
+                displayError(
+                    `Unable to fetch ${input} after ${retryCount} attempt(s). Check ticker spelling or try again later.`,
+                    retryCount
+                );
+
+            } finally {
+                isFetching = false;
+                fetchBtn.innerHTML = '<span>ðŸ”</span> FETCH';
+                fetchBtn.disabled = false;
+                dashboard.classList.remove('loading');
+                currentAbortController = null;
+            }
+        }
+
+        function displayPrice(data) {
+            const dashboard = document.getElementById('cryptoDashboard');
+            const priceNum = parseFloat(data.price);
+
+            document.getElementById('coinName').innerText = currentTicker;
+            document.getElementById('labelOne').innerText = "Live Price:";
+            document.getElementById('currentPrice').innerHTML = formatPrice(priceNum, " USD");
+
+            const changeRow = document.getElementById('changeRow');
+            const changeElement = document.getElementById('priceChange');
+
+            if (data.change !== null && data.change !== undefined && !isNaN(data.change)) {
+                changeRow.style.display = '';
+                const changeValue = parseFloat(data.change);
+                const changeClass = changeValue >= 0 ? 'price-up' : 'price-down';
+                const changeSymbol = changeValue >= 0 ? 'â–²' : 'â–¼';
+                changeElement.innerHTML = `${changeSymbol} ${Math.abs(changeValue).toFixed(2)}%`;
+                changeElement.className = `data-value ${changeClass}`;
+            } else {
+                changeRow.style.display = 'none';
+            }
+
+            const sourceRow = document.getElementById('sourceRow');
+            if (data.source) {
+                sourceRow.style.display = '';
+                document.getElementById('dataSource').textContent = data.source;
+            } else {
+                sourceRow.style.display = 'none';
+            }
+
+            updateLastUpdated();
+            dashboard.style.display = "block";
+            dashboard.style.animation = 'none';
+            dashboard.offsetHeight;
+            dashboard.style.animation = 'slideIn 0.3s ease';
+        }
+
+        function formatPrice(num, suffix = "") {
+            if (!num && num !== 0) return "$0.00" + suffix;
+            return '$' + num.toLocaleString('en-US', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            }) + suffix;
+        }
+
+        function displayError(message, attempts = 0) {
+            document.getElementById('cryptoDashboard').style.display = "none";
+            const errBox = document.getElementById('errorBox');
+            errBox.innerHTML = message;
+            if (attempts > 1) {
+                errBox.innerHTML += `<div class="retry-count">Tried ${attempts} different routes</div>`;
+            }
+            errBox.style.display = "block";
+            setTimeout(() => errBox.style.display = "none", 6000);
+        }
+
+        function refreshPrice() {
+            if (currentTicker && !isFetching) {
+                routeFetch(true);
+                showToast('Refreshing stock price...');
+            }
+        }
+
+        setInterval(() => {
+            if (currentTicker && !isFetching) {
+                routeFetch(true);
+            }
+        }, 60000);
+
+        window.onload = function() {
+            const savedTicker = localStorage.getItem('tracker_last_ticker');
+            if (savedTicker) {
+                document.getElementById('coinInput').value = savedTicker;
+                toggleClearButton();
+            }
+            routeFetch();
+        };
+    </script>
+</body>
+</html>
