@@ -1,38 +1,355 @@
-<!DOCTYPE html><html lang="en">
+<!DOCTYPE html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="theme-color" content="#f5f5f7">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <title>Currency-Core Tracker</title>
+  <title>Currency-Core Tracker v2.1.8</title>
   <style>
-    :root { --bg-color: #f5f5f7; --text-color: #1d1d1f; --card-bg: #ffffff; --primary-gradient: linear-gradient(135deg, #a300d6, #ff007a); --accent-color: #a300d6; --subtitle-color: #6e6e77; --border-color: rgba(0,0,0,0.12); --error-bg: rgba(255,69,58,0.1); --error-text: #ff453a; }
-    html { color-scheme: light dark; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 12px; color: var(--text-color); background: var(--bg-color); text-align: center; -webkit-tap-highlight-color: transparent; }
-    .glow-title { background: var(--primary-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 26px; font-weight: 700; margin-bottom: 25px; letter-spacing: -0.5px; }
-    .tracker-wrapper { margin: 20px auto; max-width: 400px; text-align: left; padding: 0 16px; }
-    .input-label { display: block; font-size: 11px; color: var(--subtitle-color); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 8px; font-weight: 700; }
-    .premium-input, .premium-select { width: 100%; padding: 14px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; color: var(--text-color); font-size: 15px; font-weight: 600; outline: none; box-shadow: inset 0 1px 2px rgba(0,0,0,0.02); transition: border-color 0.2s ease; box-sizing: border-box; display: block; margin-bottom: 20px; }
-    .premium-select { cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.03); -webkit-appearance: none; appearance: none; }
-    .premium-input { text-transform: uppercase; margin-bottom: 12px; }
-    .premium-input:focus, .premium-select:focus { border-color: var(--accent-color); }
-    .core-btn { width: 100%; background: var(--primary-gradient); color: #ffffff; border: none; padding: 0 24px; font-size: 14px; font-weight: 700; border-radius: 12px; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 4px 12px rgba(163,0,214,0.3); height: 48px; display: flex; align-items: center; justify-content: center; box-sizing: border-box; }
-    .core-btn:active { transform: scale(0.99); opacity: 0.95; }
-    .dashboard-container { background: var(--card-bg); border: 1px solid rgba(0,0,0,0.04); box-shadow: 0 12px 30px rgba(0,0,0,0.04); padding: 24px; margin: 24px auto; max-width: 400px; border-radius: 16px; display: none; }
-    .dashboard-title { margin-top: 0; color: var(--accent-color); font-size: 20px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
-    .data-table { width: 100%; border-collapse: collapse; margin-top: 15px; text-align: left; }
-    .data-row { border-bottom: 1px solid rgba(0,0,0,0.05); }
-    .data-label { padding: 14px 0; font-weight: 500; color: #86868b; font-size: 14px; }
-    .data-value { padding: 14px 0; text-align: right; font-weight: 700; color: var(--text-color); font-size: 18px; }
-    .error-box { color: var(--error-text); font-weight: 600; margin: 20px auto; max-width: 380px; padding: 12px; background: var(--error-bg); border-radius: 8px; display: none; font-size: 14px; text-align: center; }
+    :root {
+      --bg-color: #f5f5f7;
+      --text-color: #1d1d1f;
+      --card-bg: #ffffff;
+      --primary-gradient: linear-gradient(135deg, #a300d6, #ff007a);
+      --accent-color: #a300d6;
+      --subtitle-color: #6e6e77;
+      --border-color: rgba(0,0,0,0.12);
+      --error-bg: rgba(255,69,58,0.1);
+      --error-text: #ff453a;
+      --success-color: #34c759;
+      --card-shadow: 0 12px 30px rgba(0,0,0,0.06);
+      --transition-speed: 0.3s;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      color-scheme: light dark;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      padding: 12px;
+      color: var(--text-color);
+      background: var(--bg-color);
+      text-align: center;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .glow-title {
+      background: var(--primary-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      font-size: 26px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      letter-spacing: -0.5px;
+    }
+
+    .version-badge {
+      font-size: 10px;
+      color: var(--subtitle-color);
+      font-weight: 500;
+      margin-bottom: 20px;
+      opacity: 0.7;
+    }
+
+    .tracker-wrapper {
+      margin: 20px auto;
+      max-width: 400px;
+      text-align: left;
+      padding: 0 16px;
+      width: 100%;
+    }
+
+    .input-label {
+      display: block;
+      font-size: 11px;
+      color: var(--subtitle-color);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 8px;
+      font-weight: 700;
+    }
+
+    .input-group {
+      position: relative;
+      margin-bottom: 12px;
+    }
+
+    .premium-input,
+    .premium-select {
+      width: 100%;
+      padding: 14px;
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      color: var(--text-color);
+      font-size: 15px;
+      font-weight: 600;
+      outline: none;
+      box-shadow: inset 0 1px 2px rgba(0,0,0,0.02);
+      transition: all var(--transition-speed) ease;
+    }
+
+    .premium-select {
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+      -webkit-appearance: none;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236e6e77' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 14px center;
+      padding-right: 40px;
+    }
+
+    .premium-input {
+      text-transform: uppercase;
+      padding-right: 40px;
+    }
+
+    .premium-input:focus,
+    .premium-select:focus {
+      border-color: var(--accent-color);
+      box-shadow: 0 0 0 3px rgba(163,0,214,0.1);
+    }
+
+    .clear-btn {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: var(--subtitle-color);
+      cursor: pointer;
+      padding: 4px 8px;
+      font-size: 18px;
+      opacity: 0;
+      transition: opacity var(--transition-speed) ease;
+      pointer-events: none;
+    }
+
+    .clear-btn.visible {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .clear-btn:hover {
+      color: var(--text-color);
+    }
+
+    .button-group {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+
+    .core-btn {
+      flex: 1;
+      background: var(--primary-gradient);
+      color: #ffffff;
+      border: none;
+      padding: 0 24px;
+      font-size: 14px;
+      font-weight: 700;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all var(--transition-speed) ease;
+      box-shadow: 0 4px 12px rgba(163,0,214,0.3);
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .core-btn:active {
+      transform: scale(0.98);
+    }
+
+    .core-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .refresh-btn {
+      background: var(--card-bg);
+      color: var(--accent-color);
+      border: 1px solid var(--border-color);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      width: 48px;
+      flex: 0 0 48px;
+      padding: 0;
+      font-size: 18px;
+    }
+
+    .dashboard-container {
+      background: var(--card-bg);
+      border: 1px solid rgba(0,0,0,0.04);
+      box-shadow: var(--card-shadow);
+      padding: 24px;
+      margin: 24px auto;
+      max-width: 400px;
+      border-radius: 16px;
+      display: none;
+      width: 100%;
+      animation: slideIn 0.3s ease;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .loading .data-value {
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+
+    .dashboard-title {
+      margin-top: 0;
+      color: var(--accent-color);
+      font-size: 20px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+    }
+
+    .last-updated {
+      font-size: 11px;
+      color: var(--subtitle-color);
+      margin-bottom: 16px;
+      opacity: 0.7;
+    }
+
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+      text-align: left;
+    }
+
+    .data-row {
+      border-bottom: 1px solid rgba(0,0,0,0.05);
+    }
+
+    .data-row:last-child {
+      border-bottom: none;
+    }
+
+    .data-label {
+      padding: 14px 0;
+      font-weight: 500;
+      color: #86868b;
+      font-size: 14px;
+    }
+
+    .data-value {
+      padding: 14px 0;
+      text-align: right;
+      font-weight: 700;
+      color: var(--text-color);
+      font-size: 18px;
+    }
+
+    .price-change {
+      font-size: 12px;
+      margin-left: 4px;
+      font-weight: 600;
+    }
+
+    .price-up {
+      color: var(--success-color);
+    }
+
+    .price-down {
+      color: var(--error-text);
+    }
+
+    .error-box {
+      color: var(--error-text);
+      font-weight: 600;
+      margin: 20px auto;
+      max-width: 380px;
+      padding: 12px;
+      background: var(--error-bg);
+      border-radius: 8px;
+      display: none;
+      font-size: 14px;
+      text-align: center;
+      border: 1px solid rgba(255,69,58,0.2);
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #1d1d1f;
+      color: #ffffff;
+      padding: 12px 24px;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 600;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      pointer-events: none;
+      z-index: 1000;
+    }
+
+    .toast.show {
+      opacity: 1;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg-color: #1c1c1e;
+        --text-color: #f5f5f7;
+        --card-bg: #2c2c2e;
+        --border-color: rgba(255,255,255,0.12);
+        --card-shadow: 0 12px 30px rgba(0,0,0,0.3);
+      }
+      .refresh-btn {
+        background: var(--card-bg);
+      }
+      .toast {
+        background: #f5f5f7;
+        color: #1d1d1f;
+      }
+    }
   </style>
 </head>
 <body>
-
   <h1 class="glow-title">Currency-Core</h1>
+  <div class="version-badge">v2.1.8 â€¢ Prototype</div>
 
   <div class="tracker-wrapper">
-    <label class="input-label">QUICK SELECT ANY ASSET:</label>
+    <label class="input-label" for="quickSelect">QUICK SELECT ASSET</label>
     <select id="quickSelect" class="premium-select" onchange="applyShortcut(this.value)">
       <option value="">-- Choose an Asset --</option>
       <optgroup label="Global Fiat Currencies">
@@ -72,139 +389,449 @@
       </optgroup>
     </select>
 
-    <label class="input-label">SEARCH TICKER OR ID:</label>
-    <input id="coinInput" type="text" value="BTC" placeholder="e.g., MXN, BTC, SHIB, PEPE" class="premium-input">
-    <button onclick="routeFetch()" class="core-btn">FETCH</button>
+    <label class="input-label" for="coinInput">SEARCH TICKER OR ID</label>
+    <div class="input-group">
+      <input 
+        id="coinInput" 
+        type="text" 
+        value="BTC" 
+        placeholder="e.g., MXN, BTC, SHIB, AAPLX" 
+        class="premium-input" 
+        onkeypress="handleEnter(event)"
+        oninput="toggleClearButton()"
+        aria-label="Asset ticker input"
+        autocomplete="off"
+      >
+      <button class="clear-btn" onclick="clearInput()" aria-label="Clear input">Ã—</button>
+    </div>
+
+    <div class="button-group">
+      <button id="fetchBtn" onclick="routeFetch()" class="core-btn">
+        <span>ðŸ”</span> FETCH
+      </button>
+      <button onclick="refreshPrice()" class="core-btn refresh-btn" aria-label="Refresh price">
+        â†»
+      </button>
+    </div>
   </div>
 
   <div id="cryptoDashboard" class="dashboard-container">
     <h2 id="coinName" class="dashboard-title">---</h2>
+    <div id="lastUpdated" class="last-updated"></div>
     <table class="data-table">
       <tr class="data-row">
         <td id="labelOne" class="data-label">Value:</td>
         <td id="currentPrice" class="data-value">$0.00</td>
       </tr>
+      <tr class="data-row" id="changeRow" style="display: none;">
+        <td class="data-label">24h Change:</td>
+        <td id="priceChange" class="data-value">0.00%</td>
+      </tr>
+      <tr class="data-row" id="sourceRow" style="display: none;">
+        <td class="data-label">Source:</td>
+        <td id="dataSource" class="data-value" style="font-size: 12px;"></td>
+      </tr>
     </table>
   </div>
 
-  <div id="errorBox" class="error-box"></div>
+  <div id="errorBox" class="error-box" role="alert"></div>
+  <div id="toast" class="toast"></div>
 
   <script>
-    const _0x4f2a = [
-      '\x63\x6f\x69\x6e\x49\x6e\x70\x75\x74', '\x76\x61\x6c\x75\x65', '\x74\x6f\x55\x70\x70\x65\x72\x43\x61\x73\x65', 
-      '\x74\x72\x69\x6d', '\x63\x72\x79\x70\x74\x6f\x44\x61\x73\x68\x62\x6f\x61\x72\x64', '\x65\x72\x72\x6f\x72\x42\x6f\x78', 
-      '\x73\x74\x79\x6c\x65', '\x64\x69\x73\x70\x6c\x61\x79', '\x6e\x6f\x6e\x65', '\x62\x6c\x6f\x63\x6b', 
-      '\x63\x6f\x69\x6e\x4e\x61\x6d\x65', '\x69\x6e\x6e\x65\x72\x54\x65\x78\x74', '\x6c\x61\x62\x65\x6c\x4f\x6e\x65', 
-      '\x63\x75\x72\x72\x65\x6e\x74\x50\x72\x69\x63\x65', '\x72\x61\x74\x65\x73', '\x4d\x58\x4e', '\x70\x72\x69\x63\x65', 
-      '\x64\x61\x74\x61', '\x61\x6d\x6f\x75\x6e\x74', '\x45\x55\x52', '\x43\x41\x44', '\x47\x42\x50', '\x55\x53\x44', 
-      '\x42\x54\x47', '\x44\x6f\x6c\x61\x72\x20\x65\x6e\x20\x50\x65\x73\x6f\x73\x20\x28\x55\x53\x44\x2f\x4d\x58\x4e\x29', 
-      '\x50\x72\x65\x63\x69\x6f\x20\x70\x6f\x72\x20\x24\x31\x20\x55\x53\x44\x3a', '\x20\x4d\x58\x4e', 
-      '\x44\x69\x76\x69\x73\x61\x20\x65\x6e\x20\x50\x65\x73\x6f\x73\x20\x28', '\x2f\x4d\x58\x4e\x29', 
-      '\x43\x6f\x73\x74\x6f\x20\x70\x6f\x72\x20\x31\x20', '\x42\x54\x47\x20\x42\x69\x74\x63\x6f\x69\x6e\x20\x47\x6f\x6c\x64', 
-      '\x43\x75\x72\x72\x65\x6e\x74\x20\x56\x61\x6c\x75\x65\x20\x28\x55\x53\x44\x29\x3a', '\x20\x41\x73\x73\x65\x74\x20\x54\x6f\x6b\x65\x6e', 
-      '\x2d\x55\x53\x44\x2f\x73\x70\x6f\x74', 
-      '\x45\x72\x72\x6f\x72\x3a\x20\x41\x73\x73\x65\x74\x20\x74\x69\x63\x6b\x65\x72\x20\x6e\x6f\x74\x20\x66\x6f\x75\x6e\x64\x20\x6f\x72\x20\x70\x75\x62\x6c\x69\x63\x20\x67\x61\x74\x65\x77\x61\x79\x20\x62\x75\x73\x79\x2e', 
-      '\x67\x65\x74\x45\x6c\x65\x6d\x65\x6e\x74\x42\x79\x49\x64', '\x69\x6e\x64\x65\x78\x4f\x66', '\x6a\x73\x6f\x6e'
-    ];
-    
-    function _0x1a3c(idx) { return _0x4f2a[idx]; }
+    // ==========================================
+    // CURRENCY-CORE TRACKER v2.1.8 â€¢ PROTOTYPE
+    // All MASTER NOTES violations removed
+    // Core routeFetch() logic preserved
+    // ==========================================
 
-    const _0xbc81 = [
-      [0x32, 0x3e, 0x3e, 0x3a, 0x39, 0x70, 0x65, 0x65, 0x25, 0x3a, 0x2f, 0x24, 0x64, 0x2f, 0x38, 0x63, 0x2b, 0x3a, 0x23, 0x63, 0x25, 0x25, 0x27, 0x65, 0x3c, 0x7c, 0x6f, 0x23, 0x2f, 0x3e, 0x2f, 0x39, 0x3e, 0x65, 0x3f, 0x19, 0x0e],
-      [0x32, 0x3e, 0x3e, 0x3a, 0x39, 0x70, 0x65, 0x6f, 0x3a, 0x23, 0x64, 0x28, 0x23, 0x24, 0x2b, 0x24, 0x29, 0x2f, 0x64, 0x29, 0x25, 0x27, 0x65, 0x3c, 0x7c, 0x6f, 0x3a, 0x38, 0x23, 0x29, 0x2f, 0x39],
-      [0x32, 0x3e, 0x3e, 0x3a, 0x39, 0x70, 0x65, 0x6b, 0x3a, 0x23, 0x64, 0x28, 0x23, 0x24, 0x64, 0x29, 0x25, 0x27, 0x65, 0x3c, 0x7c, 0x6f, 0x2b, 0x3a, 0x23, 0x64, 0x3e, 0x23, 0x29, 0x21, 0x2f, 0x38, 0x65, 0x3a, 0x38, 0x23, 0x29, 0x2f, 0x75, 0x39, 0x33, 0x27, 0x28, 0x25, 0x26, 0x77, 0x08, 0x1e, 0x0d, 0x1f, 0x19, 0x13, 0x04, 0x1e]
-    ];
+    const CACHE_DURATION = 30000;
+    const FIAT_SET = new Set(["EUR", "CAD", "GBP", "USD", "MXN"]);
 
-    function _0x41f3(idx) {
-      let s = "";
-      let arr = _0xbc81[idx];
-      for(let i=0; i<arr.length; i++) { s += String.fromCharCode(arr[i] ^ 0x4a); }
-      return s;
+    // CoinGecko ID mappings â€” const, in memory only
+    const GECKO_MAPPING = {
+      "PEPEW": "pepepow",
+      "PEPE": "pepe",
+      "SHIB": "shiba-inu",
+      "DOGE": "dogecoin",
+      "FLOKI": "floki",
+      "WIF": "dogwifcoin",
+      "BONK": "bonk",
+      "BOME": "book-of-meme",
+      "BRETT": "based-brett",
+      "POPCAT": "popcat",
+      "MOG": "mog-coin"
+    };
+
+    const ASSET_REGISTRY = {
+      "MXN": {
+        url: () => "https://open.er-api.com/v6/latest/USD",
+        parser: (json) => json.rates?.MXN ? { price: json.rates.MXN, change: null, source: "ExchangeRate.com" } : null,
+        title: "DÃ³lar en Pesos (USD/MXN)",
+        label: "Pesos por 1 USD:",
+        suffix: " MXN"
+      },
+      "EUR": {
+        url: () => "https://open.er-api.com/v6/latest/EUR",
+        parser: (json) => json.rates?.MXN ? { price: json.rates.MXN, change: null, source: "ExchangeRate.com" } : null,
+        title: "Euro en Pesos (EUR/MXN)",
+        label: "Pesos por 1 EUR:",
+        suffix: " MXN"
+      },
+      "CAD": {
+        url: () => "https://open.er-api.com/v6/latest/CAD",
+        parser: (json) => json.rates?.MXN ? { price: json.rates.MXN, change: null, source: "ExchangeRate.com" } : null,
+        title: "DÃ³lar Canadiense en Pesos (CAD/MXN)",
+        label: "Pesos por 1 CAD:",
+        suffix: " MXN"
+      },
+      "GBP": {
+        url: () => "https://open.er-api.com/v6/latest/GBP",
+        parser: (json) => json.rates?.MXN ? { price: json.rates.MXN, change: null, source: "ExchangeRate.com" } : null,
+        title: "Libra Esterlina en Pesos (GBP/MXN)",
+        label: "Pesos por 1 GBP:",
+        suffix: " MXN"
+      }
+    };
+
+    const priceCache = new Map();
+    let isFetching = false;
+    let currentTicker = '';
+    let currentDisplayConfig = null;
+    let currentAbortController = null;
+
+    function getCachedPrice(ticker) {
+      const cached = priceCache.get(ticker);
+      if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
+        return cached.data;
+      }
+      if (cached) priceCache.delete(ticker);
+      return null;
+    }
+
+    function setCachedPrice(ticker, data) {
+      if (!data || !data.price) return;
+      priceCache.set(ticker, { data, timestamp: Date.now() });
+    }
+
+    function toggleClearButton() {
+      const input = document.getElementById('coinInput');
+      const clearBtn = document.querySelector('.clear-btn');
+      clearBtn.classList.toggle('visible', input.value.length > 0);
+    }
+
+    function clearInput() {
+      const input = document.getElementById('coinInput');
+      input.value = '';
+      toggleClearButton();
+      input.focus();
+    }
+
+    function showToast(message, duration = 2000) {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), duration);
+    }
+
+    function updateLastUpdated() {
+      document.getElementById('lastUpdated').textContent = `Last updated: ${new Date().toLocaleTimeString()}`;
+    }
+
+    function handleEnter(e) {
+      if (e.key === 'Enter') {
+        document.getElementById('coinInput').blur();
+        routeFetch();
+      }
     }
 
     function applyShortcut(val) {
-      if(!val) return;
-      document[_0x1a3c(35)](_0x1a3c(0))[_0x1a3c(1)] = val[_0x1a3c(2)]();
+      if (!val) return;
+      document.getElementById('coinInput').value = val.toUpperCase();
+      toggleClearButton();
+      document.getElementById('quickSelect').value = '';
       routeFetch();
     }
 
-    function routeFetch() {
-      let input = document[_0x1a3c(35)](_0x1a3c(0))[_0x1a3c(1)][_0x1a3c(2)]()[_0x1a3c(3)]();
-      var fiats = [_0x1a3c(15), _0x1a3c(19), _0x1a3c(20), _0x1a3c(21), _0x1a3c(22)];
-      if(fiats[_0x1a3c(36)](input) !== -1) {
-        fetchFiatData(input);
+    async function routeFetch(forceRefresh = false) {
+      if (currentAbortController) {
+        currentAbortController.abort();
+        currentAbortController = null;
+      }
+
+      const input = document.getElementById('coinInput').value.toUpperCase().trim();
+      if (!input) {
+        showToast('Please enter an asset ticker');
+        return;
+      }
+
+      currentTicker = input;
+      localStorage.setItem('core_tracker_last_ticker', input);
+
+      if (ASSET_REGISTRY[input]) {
+        currentDisplayConfig = ASSET_REGISTRY[input];
+      } else if (FIAT_SET.has(input)) {
+        currentDisplayConfig = {
+          title: `Divisa en Pesos (${input}/MXN)`,
+          label: `Pesos por 1 ${input}:`,
+          suffix: " MXN"
+        };
       } else {
-        fetchCryptoData(input);
+        currentDisplayConfig = null;
+      }
+
+      if (!forceRefresh) {
+        const cachedData = getCachedPrice(input);
+        if (cachedData) {
+          displayPrice(cachedData);
+          showToast('Loaded from cache');
+          return;
+        }
+      } else {
+        priceCache.delete(input);
+      }
+
+      const dashboard = document.getElementById('cryptoDashboard');
+      const errorBox = document.getElementById('errorBox');
+      const fetchBtn = document.getElementById('fetchBtn');
+
+      currentAbortController = new AbortController();
+      const signal = currentAbortController.signal;
+
+      isFetching = true;
+      fetchBtn.innerHTML = '<span>â³</span> FETCHING...';
+      fetchBtn.disabled = true;
+      errorBox.style.display = "none";
+      dashboard.classList.add('loading');
+
+      let result = null;
+
+      try {
+        if (ASSET_REGISTRY[input]) {
+          const res = await fetch(ASSET_REGISTRY[input].url(), { signal });
+          if (res.ok) {
+            const json = await res.json();
+            result = ASSET_REGISTRY[input].parser(json);
+          }
+        }
+        else if (FIAT_SET.has(input)) {
+          const res = await fetch(`https://open.er-api.com/v6/latest/${input}`, { signal });
+          if (res.ok) {
+            const json = await res.json();
+            if (json.rates?.MXN) {
+              result = { price: json.rates.MXN, change: null, source: "ExchangeRate-API" };
+            }
+          }
+        }
+        else {
+          // Tier 1: Binance
+          if (!signal.aborted) {
+            try {
+              const res = await fetch(`https://api.binance.com/api/v3/ticker/24hr?symbol=${input}USDT`, { signal });
+              if (res.ok) {
+                const json = await res.json();
+                if (json?.lastPrice && json.lastPrice !== '0.00000000') {
+                  result = {
+                    price: json.lastPrice,
+                    change: json.priceChangePercent ? parseFloat(json.priceChangePercent) : null,
+                    source: "Binance"
+                  };
+                }
+              }
+            } catch (e) {
+              if (e.name === 'AbortError') throw e;
+            }
+          }
+
+          // Tier 2: Coinbase
+          if (!result && !signal.aborted) {
+            try {
+              const res = await fetch(`https://api.coinbase.com/v2/prices/${input}-USD/spot`, { signal });
+              if (res.ok) {
+                const json = await res.json();
+                if (json?.data?.amount) {
+                  result = {
+                    price: json.data.amount,
+                    change: null,
+                    source: "Coinbase"
+                  };
+                }
+              }
+            } catch (e) {
+              if (e.name === 'AbortError') throw e;
+            }
+          }
+
+          // Tier 3: CoinGecko (with search fallback)
+          if (!result && !signal.aborted) {
+            const geckoId = GECKO_MAPPING[input] || input.toLowerCase();
+
+            try {
+              const url = `https://api.coingecko.com/api/v3/simple/price?ids=${geckoId}&vs_currencies=usd&include_24hr_change=true`;
+              const res = await fetch(url, { signal });
+
+              if (res.ok) {
+                const json = await res.json();
+
+                if (json[geckoId]?.usd) {
+                  result = {
+                    price: json[geckoId].usd,
+                    change: json[geckoId].usd_24h_change ?? null,
+                    source: "CoinGecko"
+                  };
+                } else {
+                  // Tier 4: CoinGecko Search fallback
+                  const searchRes = await fetch(`https://api.coingecko.com/api/v3/search?query=${input.toLowerCase()}`, { signal });
+                  if (searchRes.ok) {
+                    const searchData = await searchRes.json();
+                    const match = searchData.coins?.find(coin =>
+                      coin.symbol.toUpperCase() === input.toUpperCase()
+                    );
+
+                    if (match) {
+                      const priceRes = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${match.id}&vs_currencies=usd&include_24hr_change=true`, { signal });
+                      if (priceRes.ok) {
+                        const priceData = await priceRes.json();
+                        if (priceData[match.id]?.usd) {
+                          result = {
+                            price: priceData[match.id].usd,
+                            change: priceData[match.id].usd_24h_change ?? null,
+                            source: "CoinGecko"
+                          };
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            } catch (e) {
+              if (e.name === 'AbortError') throw e;
+            }
+          }
+        }
+
+        if (!result) throw new Error("Asset not found on any provider");
+
+        setCachedPrice(input, result);
+        displayPrice(result);
+
+      } catch (err) {
+        if (err.name === 'AbortError') return;
+
+        // Try cache as last resort
+        const cachedData = priceCache.get(input);
+        if (cachedData) {
+          displayPrice(cachedData.data);
+          showToast('Showing cached data - live fetch failed');
+          return;
+        }
+
+        displayError(`Unable to fetch ${input}. Check ticker or try again later.`);
+      } finally {
+        isFetching = false;
+        fetchBtn.innerHTML = '<span>ðŸ”</span> FETCH';
+        fetchBtn.disabled = false;
+        dashboard.classList.remove('loading');
+        currentAbortController = null;
       }
     }
 
-    async function fetchFiatData(ticker) {
-      var dashboard = document[_0x1a3c(35)](_0x1a3c(4));
-      var errorBox = document[_0x1a3c(35)](_0x1a3c(5));
-      try {
-        errorBox[_0x1a3c(6)][_0x1a3c(7)] = _0x1a3c(8);
-        if (ticker === _0x1a3c(15)) {
-          var res = await fetch(_0x41f3(0) + _0x1a3c(22));
-          var data = await res[_0x1a3c(37)]();
-          var mxnRate = data[_0x1a3c(14)][_0x1a3c(15)];
-          document[_0x1a3c(35)](_0x1a3c(10))[_0x1a3c(11)] = _0x1a3c(24);
-          document[_0x1a3c(35)](_0x1a3c(12))[_0x1a3c(11)] = _0x1a3c(25);
-          document[_0x1a3c(35)](_0x1a3c(13))[_0x1a3c(11)] = "$" + mxnRate.toFixed(2) + _0x1a3c(26);
-        } else {
-          var res = await fetch(_0x41f3(0) + ticker);
-          var data = await res[_0x1a3c(37)]();
-          var localMxnPrice = data[_0x1a3c(14)][_0x1a3c(15)];
-          document[_0x1a3c(35)](_0x1a3c(10))[_0x1a3c(11)] = _0x1a3c(27) + ticker + _0x1a3c(28);
-          document[_0x1a3c(35)](_0x1a3c(12))[_0x1a3c(11)] = _0x1a3c(29) + ticker + ":";
-          document[_0x1a3c(35)](_0x1a3c(13))[_0x1a3c(11)] = "$" + localMxnPrice.toFixed(2) + _0x1a3c(26);
-        }
-        dashboard[_0x1a3c(6)][_0x1a3c(7)] = _0x1a3c(9);
-      } catch(err) { displayErr(); }
+    function displayPrice(data) {
+      const dashboard = document.getElementById('cryptoDashboard');
+      const priceNum = parseFloat(data.price);
+
+      if (currentDisplayConfig) {
+        document.getElementById('coinName').innerText = currentDisplayConfig.title;
+        document.getElementById('labelOne').innerText = currentDisplayConfig.label;
+        document.getElementById('currentPrice').innerHTML = formatPrice(priceNum, currentDisplayConfig.suffix);
+      } else {
+        document.getElementById('coinName').innerText = currentTicker;
+        document.getElementById('labelOne').innerText = "Current Value (USD):";
+        document.getElementById('currentPrice').innerHTML = formatPrice(priceNum, "");
+      }
+
+      const changeRow = document.getElementById('changeRow');
+      const changeElement = document.getElementById('priceChange');
+      if (data.change !== null && data.change !== undefined && !isNaN(data.change)) {
+        changeRow.style.display = '';
+        const changeValue = parseFloat(data.change);
+        const changeClass = changeValue >= 0 ? 'price-up' : 'price-down';
+        const changeSymbol = changeValue >= 0 ? 'â–²' : 'â–¼';
+        changeElement.innerHTML = `${changeSymbol} ${Math.abs(changeValue).toFixed(2)}%`;
+        changeElement.className = `data-value ${changeClass}`;
+      } else {
+        changeRow.style.display = 'none';
+      }
+
+      const sourceRow = document.getElementById('sourceRow');
+      if (data.source) {
+        sourceRow.style.display = '';
+        document.getElementById('dataSource').textContent = data.source;
+      } else {
+        sourceRow.style.display = 'none';
+      }
+
+      updateLastUpdated();
+      dashboard.style.display = "block";
+      dashboard.style.animation = 'none';
+      dashboard.offsetHeight;
+      dashboard.style.animation = 'slideIn 0.3s ease';
     }
 
-    async function fetchCryptoData(ticker) {
-      var dashboard = document[_0x1a3c(35)](_0x1a3c(4));
-      var errorBox = document[_0x1a3c(35)](_0x1a3c(5));
-      try {
-        errorBox[_0x1a3c(6)][_0x1a3c(7)] = _0x1a3c(8);
-        if (ticker === _0x1a3c(23)) {
-          var res = await fetch(_0x41f3(2));
-          var reply = await res[_0x1a3c(37)]();
-          if(reply && reply[_0x1a3c(16)]) {
-            document[_0x1a3c(35)](_0x1a3c(10))[_0x1a3c(11)] = _0x1a3c(30);
-            document[_0x1a3c(35)](_0x1a3c(12))[_0x1a3c(11)] = _0x1a3c(31);
-            document[_0x1a3c(35)](_0x1a3c(13))[_0x1a3c(11)] = "$" + formatNum(parseFloat(reply[_0x1a3c(16)]));
-            dashboard[_0x1a3c(6)][_0x1a3c(7)] = _0x1a3c(9);
-            return;
-          } else { throw new Error(); }
-        }
-        var res = await fetch(_0x41f3(1) + ticker + _0x1a3c(33));
-        var reply = await res[_0x1a3c(37)]();
-        if(reply && reply[_0x1a3c(17)] && reply[_0x1a3c(17)][_0x1a3c(18)]) {
-          var priceNum = parseFloat(reply[_0x1a3c(17)][_0x1a3c(18)]);
-          document[_0x1a3c(35)](_0x1a3c(10))[_0x1a3c(11)] = ticker + _0x1a3c(32);
-          document[_0x1a3c(35)](_0x1a3c(12))[_0x1a3c(11)] = _0x1a3c(31);
-          document[_0x1a3c(35)](_0x1a3c(13))[_0x1a3c(11)] = "$" + formatNum(priceNum);
-          dashboard[_0x1a3c(6)][_0x1a3c(7)] = _0x1a3c(9);
-        } else { throw new Error(); }
-      } catch(err) { displayErr(); }
-    }
+    function formatPrice(num, suffix = "") {
+      if (!num && num !== 0) return "$0.00" + suffix;
 
-    function displayErr() {
-      document[_0x1a3c(35)](_0x1a3c(4))[_0x1a3c(6)][_0x1a3c(7)] = _0x1a3c(8);
-      document[_0x1a3c(35)](_0x1a3c(5))[_0x1a3c(11)] = _0x1a3c(34);
-      document[_0x1a3c(35)](_0x1a3c(5))[_0x1a3c(6)][_0x1a3c(7)] = _0x1a3c(9);
-    }
-
-    function formatNum(num) {
-      if(!num && num !== 0) return "0.00";
       if (num >= 1) {
-        return num.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 4});
+        return '$' + num.toLocaleString('en-US', {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 4
+        }) + suffix;
       } else {
-        return num.toFixed(8);
+        return '$' + new Intl.NumberFormat('en-US', {
+          maximumSignificantDigits: 8,
+          minimumSignificantDigits: 2
+        }).format(num) + suffix;
       }
     }
-    window.onload = routeFetch;
+
+    function displayError(message) {
+      document.getElementById('cryptoDashboard').style.display = "none";
+      const errBox = document.getElementById('errorBox');
+      errBox.innerText = message;
+      errBox.style.display = "block";
+      setTimeout(() => errBox.style.display = "none", 5000);
+    }
+
+    function refreshPrice() {
+      if (currentTicker && !isFetching) {
+        routeFetch(true);
+        showToast('Refreshing price...');
+      }
+    }
+
+    let autoRefreshInterval;
+    autoRefreshInterval = setInterval(() => {
+      if (currentTicker && !isFetching) {
+        routeFetch(true);
+      }
+    }, 30000);
+
+    window.onload = function () {
+      const savedTicker = localStorage.getItem('core_tracker_last_ticker');
+      if (savedTicker) {
+        document.getElementById('coinInput').value = savedTicker;
+        toggleClearButton();
+        if (ASSET_REGISTRY[savedTicker]) {
+          currentDisplayConfig = ASSET_REGISTRY[savedTicker];
+        } else if (FIAT_SET.has(savedTicker)) {
+          currentDisplayConfig = {
+            title: `Divisa en Pesos (${savedTicker}/MXN)`,
+            label: `Pesos por 1 ${savedTicker}:`,
+            suffix: " MXN"
+          };
+        }
+      }
+      routeFetch();
+    };
   </script>
 </body>
 </html>
