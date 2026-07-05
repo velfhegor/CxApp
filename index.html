@@ -2,136 +2,413 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#f5f5f7">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="description" content="CxApp Hub - Currency and Stock tracking applications">
+  <meta property="og:title" content="CxApp Hub">
+  <meta property="og:description" content="System Applications for Currency & Stock Tracking">
+  <meta property="og:type" content="website">
   
   <title>CxApp Hub</title>
+  
+  <!-- Favicon (inline SVG) -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>â¬¡</text></svg>">
+  
   <style>
+    /* ============ CSS RESET & BASE ============ */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
     :root {
+      /* Light theme (default) */
       --bg-color: #f5f5f7;
+      --bg-elevated: #ffffff;
       --text-color: #1d1d1f;
-      --card-bg: #ffffff;
-      --primary-gradient: linear-gradient(135deg, #a300d6, #ff007a);
-      --locked-gradient: linear-gradient(135deg, #8e8e93, #aeaeac);
-      --subtitle-color: #86868b;
+      --text-secondary: #86868b;
+      --border-color: rgba(0, 0, 0, 0.06);
+      --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.04);
+      --shadow-md: 0 8px 30px rgba(0, 0, 0, 0.06);
+      --shadow-lg: 0 20px 60px rgba(0, 0, 0, 0.08);
+      
+      /* Gradients */
+      --gradient-currency: linear-gradient(135deg, #a300d6, #ff007a);
+      --gradient-stock: linear-gradient(135deg, #0071e3, #00b0ff);
+      --gradient-locked: linear-gradient(135deg, #8e8e93, #aeaeac);
+      --gradient-title: linear-gradient(135deg, #a300d6, #ff007a);
+      
+      /* Spacing */
+      --spacing-xs: 8px;
+      --spacing-sm: 12px;
+      --spacing-md: 16px;
+      --spacing-lg: 24px;
+      --spacing-xl: 32px;
+      --spacing-2xl: 48px;
+      
+      /* Border radius */
+      --radius-sm: 12px;
+      --radius-md: 18px;
+      --radius-lg: 24px;
+      --radius-xl: 28px;
+      
+      /* Transitions */
+      --transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+      --transition-smooth: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      --transition-spring: 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
 
-    html { 
-      color-scheme: light dark; 
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
-      padding: 12px; 
-      color: var(--text-color); 
-      background: var(--bg-color); 
+    /* Dark theme */
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg-color: #1c1c1e;
+        --bg-elevated: #2c2c2e;
+        --text-color: #f5f5f7;
+        --text-secondary: #98989d;
+        --border-color: rgba(255, 255, 255, 0.08);
+        --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.2);
+        --shadow-md: 0 8px 30px rgba(0, 0, 0, 0.3);
+        --shadow-lg: 0 20px 60px rgba(0, 0, 0, 0.4);
+      }
+    }
+
+    html {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      text-rendering: optimizeLegibility;
+      -webkit-tap-highlight-color: transparent;
+      -webkit-text-size-adjust: 100%;
+      color-scheme: light dark;
+      scroll-behavior: smooth;
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      min-height: 100dvh; /* Dynamic viewport height for mobile */
+      padding: var(--spacing-md);
+      background: var(--bg-color);
+      color: var(--text-color);
+      transition: background var(--transition-smooth), color var(--transition-smooth);
+    }
+
+    /* ============ TYPOGRAPHY ============ */
+    .header {
       text-align: center;
-      -webkit-tap-highlight-color: transparent; 
+      margin-bottom: var(--spacing-xl);
+      animation: fadeInDown 0.6s ease-out;
     }
 
-    .glow-title { 
-      background: var(--primary-gradient); 
-      -webkit-background-clip: text; 
-      -webkit-text-fill-color: transparent; 
-      font-size: 28px; 
-      font-weight: 700; 
-      margin-top: 30px; 
-      margin-bottom: 5px; 
-      letter-spacing: -0.5px; 
+    @keyframes fadeInDown {
+      from {
+        opacity: 0;
+        transform: translateY(-16px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
-    .subtitle { 
-      color: var(--subtitle-color); 
-      font-size: 14px; 
-      font-weight: 500; 
-      margin-bottom: 35px; 
-      text-transform: uppercase; 
-      letter-spacing: 1.5px; 
+    .glow-title {
+      background: var(--gradient-title);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      font-size: clamp(28px, 5vw, 38px);
+      font-weight: 800;
+      letter-spacing: -0.8px;
+      line-height: 1.2;
+      margin-bottom: var(--spacing-xs);
+      filter: drop-shadow(0 2px 8px rgba(163, 0, 214, 0.15));
     }
 
-    .desktop-grid { 
-      display: grid; 
-      grid-template-columns: repeat(2, 1fr); 
-      gap: 16px; 
-      max-width: 400px; 
-      margin: 0 auto; 
-      padding: 0 16px; 
-      box-sizing: border-box; 
+    .subtitle {
+      color: var(--text-secondary);
+      font-size: clamp(12px, 2vw, 14px);
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      transition: color var(--transition-smooth);
     }
 
-    .app-card { 
-      background: var(--card-bg); 
-      border: 1px solid rgba(0,0,0,0.04); 
-      box-shadow: 0 8px 24px rgba(0,0,0,0.04); 
-      border-radius: 20px; 
-      padding: 20px 10px; 
-      display: flex; 
-      flex-direction: column; 
-      align-items: center; 
-      justify-content: center; 
-      text-decoration: none; 
-      color: var(--text-color); 
-      transition: transform 0.2s ease, background 0.2s ease; 
-      aspect-ratio: 1 / 1; 
+    /* ============ GRID LAYOUT ============ */
+    .app-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: var(--spacing-md);
+      width: 100%;
+      max-width: 420px;
+      padding: var(--spacing-sm);
+      animation: fadeIn 0.8s ease-out 0.2s both;
     }
 
-    .app-card:not(.disabled):active { 
-      transform: scale(0.95); 
-      background: var(--bg-color); 
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
-    .app-card.disabled {
+    /* Tablet and up: slightly larger cards */
+    @media (min-width: 500px) {
+      .app-grid {
+        max-width: 460px;
+        gap: var(--spacing-lg);
+      }
+    }
+
+    /* Desktop: even larger, with hover capabilities */
+    @media (min-width: 768px) {
+      .app-grid {
+        max-width: 500px;
+        gap: var(--spacing-xl);
+      }
+      
+      body {
+        padding: var(--spacing-xl);
+      }
+    }
+
+    /* ============ CARD STYLES ============ */
+    .app-card {
+      position: relative;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-xl);
+      padding: clamp(16px, 4vw, 24px) clamp(10px, 3vw, 16px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: var(--spacing-sm);
+      text-decoration: none;
+      color: var(--text-color);
+      aspect-ratio: 1 / 1;
+      cursor: pointer;
+      transition: 
+        transform var(--transition-spring),
+        box-shadow var(--transition-smooth),
+        background var(--transition-smooth),
+        border-color var(--transition-smooth);
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-touch-callout: none;
+    }
+
+    /* Active card interactions */
+    .app-card:not(.app-card--disabled):hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-lg);
+      border-color: rgba(163, 0, 214, 0.15);
+    }
+
+    .app-card:not(.app-card--disabled):active {
+      transform: scale(0.96);
+      transition: transform var(--transition-fast);
+      background: var(--bg-color);
+    }
+
+    .app-card:not(.app-card--disabled):focus-visible {
+      outline: 3px solid #a300d6;
+      outline-offset: 3px;
+      border-radius: var(--radius-xl);
+    }
+
+    /* Disabled card */
+    .app-card--disabled {
       cursor: not-allowed;
-      pointer-events: none; 
-      opacity: 0.85;
+      opacity: 0.7;
+      pointer-events: none;
     }
 
-    .app-icon { 
-      width: 55px; 
-      height: 55px; 
-      border-radius: 14px; 
-      display: flex; 
-      align-items: center; 
-      justify-content: center; 
-      color: white; 
-      font-weight: 700; 
-      font-size: 20px; 
-      margin-bottom: 12px; 
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1); 
+    /* ============ ICON STYLES ============ */
+    .app-icon {
+      width: clamp(50px, 10vw, 62px);
+      height: clamp(50px, 10vw, 62px);
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 700;
+      font-size: clamp(18px, 3.5vw, 22px);
+      position: relative;
+      overflow: hidden;
+      transition: transform var(--transition-spring), box-shadow var(--transition-smooth);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
     }
 
-    .app-name { 
-      font-size: 13px; 
-      font-weight: 600; 
-      letter-spacing: -0.2px; 
+    .app-card:not(.app-card--disabled):hover .app-icon {
+      transform: scale(1.05);
+      box-shadow: 0 6px 24px rgba(0, 0, 0, 0.2);
     }
 
-    .bg-tracker { background: var(--primary-gradient); }
-    .bg-locked { background: var(--locked-gradient); opacity: 0.6; }
+    /* Shine effect */
+    .app-icon::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.2),
+        transparent
+      );
+      transition: left 0.5s ease;
+    }
+
+    .app-card:not(.app-card--disabled):hover .app-icon::after {
+      left: 100%;
+    }
+
+    /* Icon backgrounds */
+    .app-icon--currency {
+      background: var(--gradient-currency);
+    }
+
+    .app-icon--stock {
+      background: var(--gradient-stock);
+    }
+
+    .app-icon--locked {
+      background: var(--gradient-locked);
+    }
+
+    /* ============ LABEL STYLES ============ */
+    .app-label {
+      font-size: clamp(13px, 2.5vw, 15px);
+      font-weight: 600;
+      letter-spacing: -0.2px;
+      text-align: center;
+      line-height: 1.3;
+      transition: color var(--transition-smooth);
+    }
+
+    .app-label--disabled {
+      color: var(--text-secondary);
+    }
+
+    /* ============ BADGE (Coming Soon) ============ */
+    .badge {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      padding: 3px 8px;
+      border-radius: 20px;
+      background: var(--border-color);
+      color: var(--text-secondary);
+      margin-top: 2px;
+      transition: background var(--transition-smooth), color var(--transition-smooth);
+    }
+
+    /* ============ FOOTER ============ */
+    .footer {
+      margin-top: var(--spacing-xl);
+      text-align: center;
+      color: var(--text-secondary);
+      font-size: 12px;
+      letter-spacing: 0.3px;
+      opacity: 0.7;
+      transition: color var(--transition-smooth);
+    }
+
+    /* ============ REDUCED MOTION ============ */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
   </style>
 </head>
 <body>
 
-  <h1 class="glow-title">CxApp Hub</h1>
-  <p class="subtitle">System Applications</p>
+  <header class="header">
+    <h1 class="glow-title">CxApp Hub</h1>
+    <p class="subtitle">System Applications</p>
+  </header>
 
-  <div class="desktop-grid">
-    <a href="tracker.html" class="app-card">
-      <div class="app-icon bg-tracker">CC</div>
-      <div class="app-name">Currency-Core</div>
-    </a>
-    <div class="app-card disabled">
-      <div class="app-icon bg-locked">+</div>
-      <div class="app-name" style="color: #86868b;">Coming Soon</div>
+  <main>
+    <div class="app-grid" role="list">
+      
+      <!-- Currency-Core -->
+      <a 
+        href="tracker.html" 
+        class="app-card" 
+        role="listitem"
+        aria-label="Currency-Core - Currency tracking application"
+      >
+        <div class="app-icon app-icon--currency" aria-hidden="true">CC</div>
+        <span class="app-label">Currency-Core</span>
+      </a>
+
+      <!-- Stock-Core -->
+      <a 
+        href="tracker2.html" 
+        class="app-card" 
+        role="listitem"
+        aria-label="Stock-Core - Stock tracking application"
+      >
+        <div class="app-icon app-icon--stock" aria-hidden="true">SC</div>
+        <span class="app-label">Stock-Core</span>
+      </a>
+
+      <!-- Coming Soon 1 -->
+      <div 
+        class="app-card app-card--disabled" 
+        role="listitem"
+        aria-label="Coming soon"
+      >
+        <div class="app-icon app-icon--locked" aria-hidden="true">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+            <line x1="12" y1="5" x2="12" y2="14"/>
+            <line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+        </div>
+        <span class="app-label app-label--disabled">Coming Soon</span>
+        <span class="badge">Soon</span>
+      </div>
+
+      <!-- Coming Soon 2 -->
+      <div 
+        class="app-card app-card--disabled" 
+        role="listitem"
+        aria-label="Coming soon"
+      >
+        <div class="app-icon app-icon--locked" aria-hidden="true">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+            <line x1="12" y1="5" x2="12" y2="14"/>
+            <line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+        </div>
+        <span class="app-label app-label--disabled">Coming Soon</span>
+        <span class="badge">Soon</span>
+      </div>
+
     </div>
-    <div class="app-card disabled">
-      <div class="app-icon bg-locked">+</div>
-      <div class="app-name" style="color: #86868b;">Coming Soon</div>
-    </div>
-    <div class="app-card disabled">
-      <div class="app-icon bg-locked">+</div>
-      <div class="app-name" style="color: #86868b;">Coming Soon</div>
-    </div>
-  </div>
+  </main>
+
+  <footer class="footer">
+    <p>&copy; 2026 CxApp Hub</p>
+  </footer>
 
 </body>
-</html>
+  </html>
