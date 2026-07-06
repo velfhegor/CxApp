@@ -1,83 +1,90 @@
 const express = require('express');
+const cors = require('cors'); // Essential addition to allow tracker2.html to connect
 const app = express();
 
-app.get('/stock/:ticker', async (req, res) => {
-    // FORCE uppercase so FRED never drops a 400 error on lowercase input
-    const ticker = req.params.ticker.toUpperCase();
-    
-    // Default fallback is the S&P 500
-    let seriesId = "SP500"; 
-    let displayName = "S&P 500 Index (FRED)";
+// Enable CORS for all incoming requests
+app.use(cors());
 
-    // Route requests dynamically to different world markets
-    if (ticker === "NASDAQ" || ticker === "NDAQ" || ticker === "COMP") {
-        seriesId = "NASDAQCOM";
-        displayName = "NASDAQ Composite (FRED)";
-    } else if (ticker === "NDX" || ticker === "QQQ") {
-        seriesId = "NASDAQ100";
-        displayName = "NASDAQ 100 (FRED)";
-    } else if (ticker === "LONDON" || ticker === "LSE" || ticker === "UK") {
-        seriesId = "SPASTT01GBM661N";
-        displayName = "London Stock Exchange Index (FRED)";
-    } else if (ticker === "TOKYO" || ticker === "NIKKEI" || ticker === "JP") {
-        seriesId = "NIKKEI225";
-        displayName = "Nikkei 225 Tokyo Index (FRED)";
-    } else if (ticker === "MEXICO" || ticker === "BMV" || ticker === "IPC" || ticker === "MX") {
-        seriesId = "SPASTT01MXM661N";
-        displayName = "Mexican IPC Index (FRED)";
-    }
+app.get('/stock/:ticker', async (req, res) => {
+    const ticker = req.params.ticker.toUpperCase();
 
     try {
-        const publicKey = "abcdefghijklmnopqrstuvwxyz123456";
-        const targetUrl = `https://api.stlouisfed.org/fred/series/observations?series_id=${seriesId}&api_key=${publicKey}&file_type=json`;
+        const targetUrl = `https://query2.finance.yahoo.com/v8/finance/chart/${ticker}?region=US&lang=en-US&includePrePost=false&interval=1m&range=1d`;
         
-        const response = await fetch(targetUrl);
-        if (!response.ok) throw new Error(`FRED API returned status ${response.status}`);
-        
-        const fredData = await response.json();
+        // Essential addition: Chrome headers to bypass Yahoo's anti-bot firewall
+        const response = await fetch(targetUrl, {
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                'Accept': 'application/json'
+            }
+        });
 
-        if (fredData && fredData.observations && fredData.observations.length > 0) {
-            const lastObservation = fredData.observations[fredData.observations.length - 1];
-            const prevObservation = fredData.observations[fredData.observations.length - 2];
-
-            const currentPrice = parseFloat(lastObservation.value);
-            const previousClose = parseFloat(prevObservation.value);
-
-            const fakeYahooStructure = {
-                chart: {
-                    result: [
-                        {
-                            meta: {
-                                regularMarketPrice: currentPrice,
-                                previousClose: previousClose,
-                                shortName: displayName,
-                                marketState: "REGULAR"
-                            },
-                            timestamp: [Math.floor(Date.now() / 1000)],
-                            indicators: {
-                                quote: [
-                                    {
-                                        open: [previousClose],
-                                        close: [currentPrice]
-                                    }
-                                ]
-                            }
-                        }
-                    ],
-                    error: null
-                }
-            };
-
-            return res.json(fakeYahooStructure);
-        } else {
-            return res.status(404).json({ chart: { result: null, error: "Market data unavailable" } });
+        // Catch Yahoo blocks and log exactly what happened
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`Yahoo rejected request: Status ${response.status} - ${errorText}`);
         }
 
+        const data = await response.json();
+
+        // Your exact data extraction logic
+        const meta = data?.chart?.result?.[0]?.meta;
+        const timestamps = data?.chart?.result?.[0]?.timestamp || null;
+        const quotes = data?.chart?.result?.[0]?.indicators?.quote?.[0] || null;
+
+        if (meta && meta.regularMarketPrice !== undefined) {
+            const pctChange = meta.previousClose
+                ? ((meta.regularMarketPrice - meta.previousClose) / meta.previousClose) * 100
+                : 0;
+
+            // Extract intraday arrays
+            let firstOpen = null;
+            let firstOpenTime = null;
+            let lastClose = null;
+            let lastCloseTime = null;
+
+            if (timestamps && Array.isArray(timestamps) && timestamps.length > 0 && quotes) {
+                const opens = quotes.open || [];
+                const closes = quotes.close || [];
+
+                for (let i = 0; i < opens.length; i++) {
+                    if (opens[i] !== null && opens[i] !== undefined) {
+                        firstOpen = opens[i];
+                        firstOpenTime = timestamps[i] || null;
+                        break;
+                    }
+                }
+
+                for (let i = closes.length - 1; i >= 0; i--) {
+                    if (closes[i] !== null && closes[i] !== undefined) {
+                        lastClose = closes[i];
+                        lastCloseTime = timestamps[i] || null;
+                        break;
+                    }
+                }
+            }
+
+            // Exactly matching the format tracker2.html is looking for
+            res.json({
+                price: meta.regularMarketPrice,
+                change: pctChange,
+                source: "Your Private Server",
+                shortName: meta.shortName || null,
+                marketState: meta.marketState || null,
+                firstOpen: firstOpen,
+                firstOpenTime: firstOpenTime,
+                lastClose: lastClose,
+                lastCloseTime: lastCloseTime
+            });
+        } else {
+            res.status(404).json({ error: 'Ticker not found or data missing from Yahoo' });
+        }
     } catch (e) {
-        console.error("Keyless Global Fetch Error:", e.message);
-        return res.status(500).json({ chart: { result: null, error: e.message } });
+        console.error("Server Error:", e.message);
+        res.status(500).json({ error: 'Fetch failed', details: e.message });
     }
 });
 
+// Essential addition: Render deployment port
 const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
