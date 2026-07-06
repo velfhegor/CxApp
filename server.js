@@ -2,11 +2,32 @@ const express = require('express');
 const app = express();
 
 app.get('/stock/:ticker', async (req, res) => {
-    // FRED tracks market indices like 'SP500', so we default to that 
-    const seriesId = "SP500"; 
+    // FORCE uppercase so FRED never drops a 400 error on lowercase input
+    const ticker = req.params.ticker.toUpperCase();
+    
+    // Default fallback is the S&P 500
+    let seriesId = "SP500"; 
+    let displayName = "S&P 500 Index (FRED)";
+
+    // Route requests dynamically to different world markets
+    if (ticker === "NASDAQ" || ticker === "NDAQ" || ticker === "COMP") {
+        seriesId = "NASDAQCOM";
+        displayName = "NASDAQ Composite (FRED)";
+    } else if (ticker === "NDX" || ticker === "QQQ") {
+        seriesId = "NASDAQ100";
+        displayName = "NASDAQ 100 (FRED)";
+    } else if (ticker === "LONDON" || ticker === "LSE" || ticker === "UK") {
+        seriesId = "SPASTT01GBM661N";
+        displayName = "London Stock Exchange Index (FRED)";
+    } else if (ticker === "TOKYO" || ticker === "NIKKEI" || ticker === "JP") {
+        seriesId = "NIKKEI225";
+        displayName = "Nikkei 225 Tokyo Index (FRED)";
+    } else if (ticker === "MEXICO" || ticker === "BMV" || ticker === "IPC" || ticker === "MX") {
+        seriesId = "SPASTT01MXM661N";
+        displayName = "Mexican IPC Index (FRED)";
+    }
 
     try {
-        // Official open-access developer test key that requires zero account registration
         const publicKey = "abcdefghijklmnopqrstuvwxyz123456";
         const targetUrl = `https://api.stlouisfed.org/fred/series/observations?series_id=${seriesId}&api_key=${publicKey}&file_type=json`;
         
@@ -16,14 +37,12 @@ app.get('/stock/:ticker', async (req, res) => {
         const fredData = await response.json();
 
         if (fredData && fredData.observations && fredData.observations.length > 0) {
-            // Grab the two most recent recorded closing days
             const lastObservation = fredData.observations[fredData.observations.length - 1];
             const prevObservation = fredData.observations[fredData.observations.length - 2];
 
             const currentPrice = parseFloat(lastObservation.value);
             const previousClose = parseFloat(prevObservation.value);
 
-            // Structure the data to look EXACTLY like Yahoo Finance for tracker2.html
             const fakeYahooStructure = {
                 chart: {
                     result: [
@@ -31,7 +50,7 @@ app.get('/stock/:ticker', async (req, res) => {
                             meta: {
                                 regularMarketPrice: currentPrice,
                                 previousClose: previousClose,
-                                shortName: "S&P 500 Index (FRED)",
+                                shortName: displayName,
                                 marketState: "REGULAR"
                             },
                             timestamp: [Math.floor(Date.now() / 1000)],
@@ -55,7 +74,7 @@ app.get('/stock/:ticker', async (req, res) => {
         }
 
     } catch (e) {
-        console.error("Keyless Fetch Error:", e.message);
+        console.error("Keyless Global Fetch Error:", e.message);
         return res.status(500).json({ chart: { result: null, error: e.message } });
     }
 });
