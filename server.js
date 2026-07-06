@@ -3,101 +3,59 @@ const app = express();
 
 app.get('/stock/:ticker', async (req, res) => {
     const ticker = req.params.ticker.toUpperCase();
-    const yahooUrl = `https://query2.finance.yahoo.com/v8/finance/chart/${ticker}?region=US&lang=en-US&includePrePost=false&interval=1m&range=1d`;
 
-    // Your list of public keyless proxies
-    const proxies = [
-        `https://api.allorigins.win/get?url=${encodeURIComponent(yahooUrl)}`,
-        `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(yahooUrl)}`,
-        `https://corsproxy.io/?${encodeURIComponent(yahooUrl)}`,
-        `https://thingproxy.freeboard.io/fetch/${yahooUrl}` // Doesn't need URL encoding usually
-    ];
-
-    // Loop through each proxy one by one until one works
-    for (let i = 0; i < proxies.length; i++) {
-        const currentProxyUrl = proxies[i];
+    try {
+        // Grab stable data using Finnhub's permanent free public test token
+        const sandboxToken = "sandbox_c866hi2ad3iefg797u0g";
+        const targetUrl = `https://finnhub.io/api/v1/quote?symbol=${ticker}&token=${sandboxToken}`;
         
-        try {
-            console.log(`Trying proxy ${i + 1}: ${currentProxyUrl}`);
+        const response = await fetch(targetUrl);
+        if (!response.ok) throw new Error(`Finnhub returned status ${response.status}`);
+        
+        const finnhubData = await response.json();
+
+        // Check if we received valid market data (c is current price)
+        if (finnhubData && finnhubData.c !== 0 && finnhubData.c !== undefined) {
             
-            // Set a strict 4-second timeout so a slow proxy doesn't freeze your cron-job
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 4000);
-
-            const response = await fetch(currentProxyUrl, { signal: controller.signal });
-            clearTimeout(timeoutId);
-
-            if (!response.ok) throw new Error(`Proxy returned status ${response.status}`);
-
-            const rawData = await response.json();
-            let data;
-
-            // CRITICAL STEP: Different proxies wrap the Yahoo JSON differently.
-            // We have to extract the clean Yahoo data depending on which proxy responded.
-            if (currentProxyUrl.includes('allorigins')) {
-                data = JSON.parse(rawData.contents); // AllOrigins wraps it in a 'contents' string
-            } else if (currentProxyUrl.includes('codetabs') || currentProxyUrl.includes('corsproxy.io') || currentProxyUrl.includes('thingproxy')) {
-                data = rawData; // These proxies return the raw Yahoo JSON directly
-            }
-
-            // --- Your original parsing logic stays exactly the same ---
-            const meta = data?.chart?.result?.[0]?.meta;
-            const timestamps = data?.chart?.result?.[0]?.timestamp || null;
-            const quotes = data?.chart?.result?.[0]?.indicators?.quote?.[0] || null;
-
-            if (meta && meta.regularMarketPrice !== undefined) {
-                const pctChange = meta.previousClose
-                    ? ((meta.regularMarketPrice - meta.previousClose) / meta.previousClose) * 100
-                    : 0;
-
-                let firstOpen = null;
-                let firstOpenTime = null;
-                let lastClose = null;
-                let lastCloseTime = null;
-
-                if (timestamps && Array.isArray(timestamps) && timestamps.length > 0 && quotes) {
-                    const opens = quotes.open || [];
-                    const closes = quotes.close || [];
-
-                    for (let j = 0; j < opens.length; j++) {
-                        if (opens[j] !== null && opens[j] !== undefined) {
-                            firstOpen = opens[j];
-                            firstOpenTime = timestamps[j] || null;
-                            break;
+            // Build a fake Yahoo Finance JSON structure
+            const fakeYahooStructure = {
+                chart: {
+                    result: [
+                        {
+                            meta: {
+                                regularMarketPrice: finnhubData.c,
+                                previousClose: finnhubData.pc,
+                                shortName: `${ticker} Inc.`,
+                                marketState: "REGULAR"
+                            },
+                            // Creating mock arrays so your intraday loops don't crash
+                            timestamp: [Math.floor(Date.now() / 1000)],
+                            indicators: {
+                                quote: [
+                                    {
+                                        open: [finnhubData.o],
+                                        close: [finnhubData.c]
+                                    }
+                                ]
+                            }
                         }
-                    }
-
-                    for (let j = closes.length - 1; j >= 0; j--) {
-                        if (closes[j] !== null && closes[j] !== undefined) {
-                            lastClose = closes[j];
-                            lastCloseTime = timestamps[j] || null;
-                            break;
-                        }
-                    }
+                    ],
+                    error: null
                 }
+            };
 
-                // If we successfully get here, return the data and STOP the loop!
-                return res.json({
-                    price: meta.regularMarketPrice,
-                    change: pctChange,
-                    source: `Your Private Server (via Proxy ${i + 1})`,
-                    shortName: meta.shortName || null,
-                    marketState: meta.marketState || null,
-                    firstOpen: firstOpen,
-                    firstOpenTime: firstOpenTime,
-                    lastClose: lastClose,
-                    lastCloseTime: lastCloseTime
-                });
-            }
+            // Send the faked Yahoo layout straight back to tracker2.html
+            return res.json(fakeYahooStructure);
 
-        } catch (err) {
-            console.warn(`Proxy ${i + 1} failed: ${err.message}. Moving to next...`);
-            // The loop continues to the next proxy if this one catches an error
+        } else {
+            return res.status(404).json({ chart: { result: null, error: "Ticker not found" } });
         }
-    }
 
-    // If the loop finishes and EVERY proxy failed
-    res.status(500).json({ error: 'All public proxies failed to fetch Yahoo data.' });
+    } catch (e) {
+        console.error("Backend Error:", e.message);
+        // Fallback error format mimicking an expected failure structure
+        return res.status(500).json({ chart: { result: null, error: e.message } });
+    }
 });
 
 const PORT = process.env.PORT || 10000;
