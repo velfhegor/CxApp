@@ -106,5 +106,49 @@ res.status(500).json({ error: 'Fetch failed', details: e.message });
 }
 });
 
+// ---------- NEW ADDITION: COMMODITY METALS ROUTE ----------
+app.get('/api/metals/:symbol', async (req, res) => {
+    try {
+        let ticker = req.params.symbol.toUpperCase().trim();
+        
+        // Maps both frontend element shorthand and names directly to active Yahoo identifiers
+        if (ticker === 'GOLD' || ticker === 'AU') ticker = 'XAUUSD=X';
+        else if (ticker === 'SILVER' || ticker === 'AG') ticker = 'XAGUSD=X';
+        else if (ticker === 'PLATINUM' || ticker === 'PT') ticker = 'PL=F';
+
+        const targetUrl = `https://query2.finance.yahoo.com/v8/finance/chart/${ticker}?region=US&lang=en-US&includePrePost=false&interval=1d&range=1d`;
+        
+        const response = await fetch(targetUrl, {
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                'Accept': 'application/json'
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error(`Yahoo rejected metal request: Status ${response.status}`);
+        }
+
+        const data = await response.json();
+        const meta = data?.chart?.result?.[0]?.meta;
+
+        if (meta && meta.regularMarketPrice !== undefined) {
+            res.json({
+                success: true,
+                asset: req.params.symbol.toLowerCase(),
+                price: meta.regularMarketPrice,
+                currency: meta.currency || 'USD',
+                timestamp: new Date().toISOString()
+            });
+        } else {
+            res.status(404).json({ success: false, error: 'Data missing from data provider' });
+        }
+    } catch (e) {
+        console.error("Metals Route Error:", e.message);
+        res.status(500).json({ success: false, error: 'Fetch failed', details: e.message });
+    }
+});
+// ----------------------------------------------------------
+
 const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
