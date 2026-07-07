@@ -2,5 +2,5 @@ services:
 - type: web
   name: stock-backend
   env: node
-  buildCommand: npm init -y && npm install express
+  buildCommand: npm install
   startCommand: node server.js
