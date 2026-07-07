@@ -1,13 +1,10 @@
-{
-  "name": "stock-backend",
-  "version": "1.0.0",
-  "description": "Stock API Backend",
-  "main": "server.js",
-  "scripts": {
-    "start": "node server.js"
-  },
-  "dependencies": {
-    "cors": "^2.8.5",
-    "express": "^4.19.2"
-  }
-}
+services:
+- type: web
+name: stock-backend
+env: node
+buildCommand: npm install
+startCommand: node server.js
+
+
+
+
